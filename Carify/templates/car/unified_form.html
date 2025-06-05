@@ -32,8 +32,7 @@
 </head>
 <body>
 
-<!-- Header -->
-<header class="landing-header ">
+<header class="landing-header">
   <div class="container-fluid p-0">
     <div class="row align-items-center m-0">
       <div class="col-12 p-0">
@@ -42,10 +41,8 @@
             <a class="navbar-brand" href="#">
               <img src="{% static 'images/carify-logo.png' %}" alt="Logo">
             </a>
-
             <div style="flex-grow: 1; position: relative; height: 100%;">
               <div style="position: absolute; top: 0; left: 0; width: 150%; height: 100%; background-color: #F04C5C; transform: skewX(-0.06turn); transform-origin: bottom left; z-index: 0;"></div>
-
               <div class="d-flex justify-content-between align-items-center w-100 px-3" style="position: relative; z-index: 1;">
                 <h2 class="m-0 text-white text-center flex-grow-1">Vehicle DPI Form</h2>
                 <a class="btn btn-outline-light ms-3" href="{% url 'admin_dashboard' %}">Go Back</a>
@@ -71,7 +68,10 @@
         </h2>
         <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse {% if name == current_form %}show{% endif %}" data-bs-parent="#formAccordion">
           <div class="accordion-body">
+
             {% if name == current_form %}
+              {{ form_instance.management_form }}
+
               {% for field in form_instance %}
               <div class="mb-3">
                 <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}{% if field.field.required %}*{% endif %}</label>

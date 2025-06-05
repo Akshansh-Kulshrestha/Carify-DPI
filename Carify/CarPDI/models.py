@@ -7,64 +7,46 @@ class Customer(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.email} - {self.phone}"
+    
+class Status(models.Model):
+    name = models.CharField(max_length=50)
+    def __str__(self):
+        return self.name
+    
+class VehicleMaker(models.Model):
+    name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.name
+    
+class VehicleFuelType(models.Model):
+    name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.name
+    
+class VehicleTransmission(models.Model):
+    name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.name
+    
+class VehicleEngineType(models.Model):
+    name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.name
 
 class Vehicle(models.Model):
 
-    MAKER_CHOICES = [
-    ('maruti_suzuki', 'Maruti Suzuki'),
-    ('hyundai', 'Hyundai'),
-    ('tata', 'Tata Motors'),
-    ('mahindra', 'Mahindra'),
-    ('honda', 'Honda'),
-    ('toyota', 'Toyota'),
-    ('kia', 'Kia'),
-    ('skoda', 'Skoda'),
-    ('volkswagen', 'Volkswagen'),
-    ('renault', 'Renault'),
-    ('mg', 'MG Motor'),
-    ('nissan', 'Nissan'),
-    ('jeep', 'Jeep'),
-    ('bmw', 'BMW'),
-    ('audi', 'Audi'),
-    ('mercedes', 'Mercedes-Benz'),
-    ('others', 'Others'),
-]
-
-    FUEL_TYPE_CHOICES = [
-    ('petrol', 'Petrol'),
-    ('diesel', 'Diesel'),
-    ('cng', 'CNG'),
-    ('electric', 'Electric'),
-    ('hybrid', 'Hybrid'),
-]   
-    TRANSMISSION_CHOICES = [
-    ('manual', 'Manual'),
-    ('automatic', 'Automatic'),
-    ('amt', 'AMT'),              
-    ('cvt', 'CVT'),              
-    ('dct', 'DCT'),              
-]
-    ENGINE_TYPE_CHOICES = [
-    ('petrol', 'Petrol'),
-    ('diesel', 'Diesel'),
-    ('cng', 'CNG'),
-    ('electric', 'Electric'),
-    ('hybrid', 'Hybrid'),
-    ('mild_hybrid', 'Mild Hybrid'),
-    ('turbo_petrol', 'Turbo Petrol'),
-    ('turbo_diesel', 'Turbo Diesel'),
-]
-
     image = models.ImageField(upload_to='cars')
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    maker = models.CharField(max_length=100, choices=MAKER_CHOICES)
+    old_car = models.BooleanField()
+    new_car = models.BooleanField()
+    maker = models.ForeignKey(VehicleMaker, on_delete=models.CASCADE)
     model = models.CharField(max_length=100)
     variant = models.CharField(max_length=100)
     vin = models.CharField(max_length=50, unique=True)
-    fuel_type = models.CharField(max_length=20, choices=FUEL_TYPE_CHOICES)
-    transmission = models.CharField(max_length=20, choices=TRANSMISSION_CHOICES)
+    fuel_type = models.ForeignKey(VehicleFuelType, on_delete=models.CASCADE)
+    transmission = models.ForeignKey(VehicleTransmission, on_delete=models.CASCADE)
     engine_cc = models.IntegerField()
-    engine_type = models.CharField(max_length=100, choices=ENGINE_TYPE_CHOICES)
+    engine_type = models.ForeignKey(VehicleEngineType, on_delete=models.CASCADE)
     bhp = models.CharField(max_length=20)
     airbags = models.CharField(max_length=1)
     mileage_kmpl = models.FloatField()
@@ -85,74 +67,184 @@ class OBDReading(models.Model):
     obd_running_kms = models.IntegerField()
     obd_tampering = models.BooleanField()
 
-class SystemCheck(models.Model):
-    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
+class System(models.Model):
     name = models.CharField(max_length=100)
-    status = models.CharField(max_length=20, default="All OK")
-    issues = models.IntegerField(default=0)
+    def __str__(self):
+        return self.name
 
-class NetworkSystem(models.Model):
+class SystemCheck(models.Model):
+
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
-    area = models.CharField(max_length=100)
-    remark = models.CharField(max_length=200)
+    system = models.ForeignKey(System, on_delete=models.CASCADE)
+    status = models.ForeignKey(Status, on_delete=models.CASCADE)
+    number_of_issues = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.system}: {self.status} ({self.number_of_issues})"
+    
+class NetworkArea(models.Model):
+    name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.name
+    
+class NetworkSystem(models.Model):
+
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
+    area = models.ForeignKey(NetworkArea, on_delete=models.CASCADE)
+    status = models.ForeignKey(Status, on_delete=models.CASCADE)
+    remark = models.CharField(max_length=200 )
+
+class FluidArea(models.Model):
+    name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.name
+    
+class FluidRange(models.Model):
+    name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.name
 
 class FluidLevel(models.Model):
+
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
-    name = models.CharField(max_length=50)
-    in_range = models.BooleanField()
-    contamination = models.CharField(max_length=20)
+    area = models.ForeignKey(FluidArea, on_delete=models.CASCADE)
+    in_range = models.ForeignKey(FluidRange, on_delete=models.CASCADE)
+    contamination = models.ForeignKey(Status, on_delete=models.CASCADE)
     recommendation = models.CharField(max_length=100)
+
+class VoltageInference(models.Model):
+    voltage = models.CharField (max_length=20)
+    engine_state = models.CharField(max_length=20)
+    interence = models.CharField(max_length=70)
+    recommendation = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"{self.voltage} {self.engine_state} {self.interence} {self.recommendation}"
+
+class Parameters(models.Model):
+    name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.name
+
+class LiveParameters(models.Model):
+
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
+    system = models.ForeignKey(Parameters, on_delete=models.CASCADE)
+    interence = models.ForeignKey(VoltageInference, on_delete=models.CASCADE)
+
+class Performance(models.Model):
+    name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.name    
 
 class PerformanceCheck(models.Model):
+
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
-    system = models.CharField(max_length=100)
-    status = models.CharField(max_length=20)
+    system = models.ForeignKey(Performance, on_delete=models.CASCADE)
+    status = models.ForeignKey(Status, on_delete=models.CASCADE)
     recommendation = models.CharField(max_length=100)
+
+class PaintArea(models.Model):
+    name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.name
+    
 
 class PaintFinish(models.Model):
+
+    STATUS_CHOICES = [('all ok','All Ok'),
+                             ('not ok','Not Ok'),
+                             ('NA', 'NA'),
+                             ]
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
-    area = models.CharField(max_length=100)
+    area = models.ForeignKey(PaintArea, on_delete=models.CASCADE)
     repainted = models.BooleanField()
-    condition = models.CharField(max_length=50)
+    condition = models.ForeignKey(Status, on_delete=models.CASCADE)
     action = models.CharField(max_length=100)
+
+class TyrePosition(models.Model):
+    name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.name
 
 class TyreCondition(models.Model):
+    
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
-    position = models.CharField(max_length=50)
+    position = models.ForeignKey(TyrePosition, on_delete=models.CASCADE)
     brand = models.CharField(max_length=50)
-    condition = models.CharField(max_length=50)
-    manufacturing_date = models.CharField(max_length=20)
+    condition = models.ForeignKey(Status, on_delete=models.CASCADE)
+    manufacturing_date = models.DateField()
     remaining_life_percent = models.FloatField()
 
+class FlushArea(models.Model):
+    name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.name
+
+class Operations(models.Model):
+    name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.name   
+
 class FlushGap(models.Model):
+
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
-    area = models.CharField(max_length=100)
-    operation = models.CharField(max_length=50)
-    observation_gap = models.CharField(max_length=50)
+    area = models.ForeignKey(FlushArea, on_delete=models.CASCADE)
+    operation = models.ForeignKey(Operations, on_delete=models.CASCADE)
+    observation_gap = models.BooleanField()
     action = models.CharField(max_length=100)
 
+class RubberArea(models.Model):
+    name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.name
+
 class RubberComponent(models.Model):
+
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
-    area = models.CharField(max_length=100)
-    condition = models.CharField(max_length=50)
+    area = models.ForeignKey(RubberArea, on_delete=models.CASCADE)
+    condition = models.ForeignKey(Status, on_delete=models.CASCADE)
     recommendation = models.CharField(max_length=100)
+
+class GlassArea(models.Model):
+    name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.name
 
 class GlassComponent(models.Model):
+
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
-    area = models.CharField(max_length=100)
+    area = models.ForeignKey(GlassArea, on_delete=models.CASCADE)
     brand = models.CharField(max_length=50)
-    condition = models.CharField(max_length=50)
+    condition = models.ForeignKey(Status, on_delete=models.CASCADE)
     recommendation = models.CharField(max_length=100)
+
+class InteriorArea(models.Model):
+    name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.name
+
+class InteriorCategory(models.Model):
+    name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.name
 
 class InteriorComponent(models.Model):
+
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
-    category = models.CharField(max_length=50, choices=[('Floor', 'Floor'), ('Plastic', 'Plastic'), ('Fabric', 'Fabric')])
-    area = models.CharField(max_length=100)
-    condition = models.CharField(max_length=50)
+    category = models.ForeignKey(InteriorCategory, on_delete=models.CASCADE)
+    area = models.ForeignKey(InteriorArea, on_delete=models.CASCADE)
+    condition = models.ForeignKey(Status, on_delete=models.CASCADE)
     recommendation = models.CharField(max_length=100)
 
+class DocumentType(models.Model):
+    name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.name
+
 class Documentation(models.Model):
+   
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
-    document = models.CharField(max_length=100)
-    status = models.CharField(max_length=50)
+    document = models.ForeignKey(DocumentType, on_delete=models.CASCADE)
+    status = models.ForeignKey(Status, on_delete=models.CASCADE)
     remark = models.CharField(max_length=200)

@@ -1,3 +1,6 @@
+from django.http import HttpResponse
+from reportlab.pdfgen import canvas
+from CarPDI.models import Vehicle
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import RegistrationForm, LoginForm, CustomPasswordResetForm
 from django.contrib.auth import authenticate, login, logout, get_user_model
@@ -70,9 +73,6 @@ def admin_dashboard(request):
     recent_inspections = Vehicle.objects.filter(
         inspection_date__gte=datetime.today() - timedelta(days=7)
     ).count()
-
-    vehicles_by_maker = Vehicle.objects.values('maker').annotate(count=Count('id'))
-    fuel_type_distribution = Vehicle.objects.values('fuel_type').annotate(count=Count('id'))
     
     vehicles = Vehicle.objects.select_related('customer').all()
     width_total_vehicles = total_vehicles * 10
@@ -110,12 +110,37 @@ def admin_dashboard(request):
         'dashboard_cards': dashboard_cards,
         'vehicles': vehicles,
     }
-    return render(request, 'user/admin_dashboard.html', context)
+    return render(request, 'user/admin_dashboard1.html', context)
 
 
-def print_vehicle_report(request, pk):
-    vehicle = get_object_or_404(Vehicle, pk=pk)
-    return render(request, 'user/vehicle_report.html', {'vehicle': vehicle})
+
+def print_vehicle_report(request, vehicle_id):
+    vehicle = get_object_or_404(Vehicle, id=vehicle_id)
+
+    # Create the HttpResponse object with PDF headers.
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="vehicle_report_{vehicle_id}.pdf"'
+
+    # Create a PDF object
+    p = canvas.Canvas(response)
+
+    # Add some text
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(100, 800, "Vehicle Inspection Report")
+
+    p.setFont("Helvetica", 12)
+    p.drawString(100, 770, f"Customer Name: {vehicle.customer.name}")
+    p.drawString(100, 750, f"Vehicle: {vehicle.maker} {vehicle.model}")
+    p.drawString(100, 730, f"Health Score: {vehicle.health_score}")
+    p.drawString(100, 710, f"Inspection Date: {vehicle.inspection_date.strftime('%Y-%m-%d')}")
+
+    # Add more details as needed, e.g. vehicle attributes, inspection notes, etc.
+
+    p.showPage()
+    p.save()
+
+    return response
+
 
 
 
