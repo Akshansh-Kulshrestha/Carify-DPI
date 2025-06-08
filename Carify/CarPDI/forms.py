@@ -43,7 +43,7 @@ class LiveParameterForm(forms.ModelForm):
 class NetworkSystemForm(forms.ModelForm):
     class Meta:
         model = NetworkSystem
-        fields = [ 'area', 'remark']
+        fields = [ 'area','status', 'remark']
 
 class FluidLevelForm(forms.ModelForm):
     class Meta:

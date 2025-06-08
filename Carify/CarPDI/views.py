@@ -11,8 +11,8 @@ from django.contrib import messages
 
 
 FORM_CLASSES = {
-    'vehicle': VehicleForm,
     'customer': CustomerForm,
+    'vehicle': VehicleForm,
     'obdreading': OBDReadingForm,
     'systemcheck': SystemCheckForm,
     'networksystem': NetworkSystemForm,

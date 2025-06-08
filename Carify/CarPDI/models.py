@@ -1,4 +1,5 @@
 from django.db import models
+from User.models import CustomUser
 
 class Customer(models.Model):
     name = models.CharField(max_length=100)
@@ -53,7 +54,7 @@ class Vehicle(models.Model):
     ncap_rating = models.CharField(max_length=20, null=True, blank=True)
     num_keys = models.IntegerField()
     inspection_date = models.DateField()
-    inspected_by = models.CharField(max_length=100)
+    inspected_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='inspected_vehicles')
     health_score = models.FloatField()
 
     def __str__(self):

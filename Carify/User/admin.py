@@ -14,14 +14,14 @@ class CustomUserAdmin(BaseUserAdmin):
     inlines = [UserRoleInline]
 
 
-    list_display = ("email", "is_staff", "is_active")
+    list_display = ("email", "first_name", "last_name", "is_staff", "is_active")
     list_filter = ("is_staff", "is_active", "is_superuser")
     ordering = ("email",)
     search_fields = ("email",)
 
     fieldsets = (
-        (None, {"fields": ("email", "password")}),
-        ("Permissions", {"fields": ("is_staff", "is_active", "is_superuser", "groups", "user_permissions")}),
+        (None, {"fields": ("email", "first_name", "last_name", "password")}),
+        ("Permissions", {"fields": ("is_staff","is_verified_by_admin", "is_active", "is_superuser", "groups", "user_permissions")}),
         ("Important dates", {"fields": ("last_login", "date_joined")}),
     )
 

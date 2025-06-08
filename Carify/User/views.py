@@ -8,6 +8,11 @@ from django.contrib.auth.views import PasswordResetView
 from CarPDI.models import *
 from django.db.models import Avg, Count
 from datetime import datetime, timedelta
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib import messages
+from django.contrib.sessions.models import Session
+from django.utils import timezone
+
 
 User = get_user_model()
 
@@ -63,9 +68,17 @@ def logout_view(request):
     logout(request)
     return redirect('login')
 
+def is_admin(user):
+    return user.is_authenticated and user.is_superuser
 
+def is_staff(user):
+    return user.is_authenticated and user.is_verified_by_admin
 
+def is_both(user):
+    return user.is_authenticated and user.is_superuser and user.is_staff
 
+@login_required
+@user_passes_test(is_staff)
 def admin_dashboard(request):
     total_vehicles = Vehicle.objects.count()
     total_customers = Customer.objects.count()
@@ -141,12 +154,114 @@ def print_vehicle_report(request, vehicle_id):
 
     return response
 
-
-
-
-    
 def delete_vehicle(request, pk):
     vehicle = get_object_or_404(Vehicle, pk=pk)
     vehicle.delete()
     return redirect('admin_dashboard')
-        
+
+
+def get_active_user_ids():
+    active_sessions = Session.objects.filter(expire_date__gte=timezone.now())
+    user_ids = []
+    for session in active_sessions:
+        data = session.get_decoded()
+        user_id = data.get('_auth_user_id')
+        if user_id:
+            user_ids.append(user_id)
+    return user_ids
+
+@login_required
+@user_passes_test(is_admin)
+def user_dashboard(request):
+    users = CustomUser.objects.annotate(vehicle_count=Count('inspected_vehicles'))
+    total_users = users.count()
+    active_user_ids = get_active_user_ids()
+    active_users = users.filter(id__in=active_user_ids).count()
+    inactive_users = total_users - active_users
+    verified_users = users.filter(is_verified_by_admin=True).count()
+
+
+
+
+
+    # Compute bar widths
+    width_total_users = total_users * 10
+    width_active_users = active_users * 10
+    width_inactive_users = inactive_users * 10
+
+    dashboard_cards = [
+        {
+            'label': 'Total Users',
+            'icon': 'fa-users',
+            'value': total_users,
+            'width': width_total_users,
+        },
+        {
+            'label': 'Active Users',
+            'icon': 'fa-user-check',
+            'value': active_users,
+            'width': width_active_users,
+        },
+        {
+            'label': 'Inactive Users',
+            'icon': 'fa-user-slash',
+            'value': inactive_users,
+            'width': width_inactive_users,
+        },
+
+        {
+            'label': 'Verified by Admin',
+            'icon': 'fa-user-shield',
+            'value': verified_users,
+            'width': verified_users * 10,
+        },
+    ]
+
+    context = {
+        'dashboard_cards': dashboard_cards,
+        'users': users,
+    }
+    return render(request, 'user/user_dashboard.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def verify_user_view(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
+    user.is_verified_by_admin = True
+    user.save()
+    messages.success(request, f"User {user.username} has been verified.")
+    return redirect('user_dashboard') 
+
+@login_required
+@user_passes_test(is_admin)
+def unverify_user_view(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
+    user.is_verified_by_admin = False
+    user.save()
+    messages.success(request, f"User {user.username} has been unverified.")
+    return redirect('user_dashboard')
+
+
+@login_required
+@user_passes_test(is_admin)
+def delete_user_view(request, user_id):
+    user_obj = get_object_or_404(CustomUser, id=user_id)
+    user_obj.delete()
+    messages.success(request, 'User deleted successfully.')
+    return redirect('user_dashboard')
+
+@login_required
+def vehicles_inspected_by_single_user(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
+    vehicles = Vehicle.objects.filter(inspected_by=user).order_by('-inspection_date')
+    return render(request, 'car/inspected_by_user.html', {
+        'inspector': user,
+        'vehicles': vehicles
+    })
+
+@login_required
+def vehicles_inspected(request):
+    vehicles = Vehicle.objects.all().order_by('-inspection_date')
+    return render(request, 'car/inspected_cars.html', {
+        'vehicles': vehicles,
+    })

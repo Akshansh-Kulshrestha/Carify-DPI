@@ -7,6 +7,7 @@ import uuid
 class CustomUser(AbstractUser):
     username=None
     email=models.EmailField(_("email address"), unique=True)
+    is_verified_by_admin = models.BooleanField(default=False)
 
     USERNAME_FIELD ="email"
     REQUIRED_FIELDS = []
