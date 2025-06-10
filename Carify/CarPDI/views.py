@@ -116,8 +116,8 @@ def unified_form_view(request):
         name: (current_form if name == current_form_name else FORM_CLASSES[name]())
         for name in form_order
     }
-
-    return render(request, 'car/unified_form.html', {
+    print(form_order)
+    return render(request, 'car/unified_form1.html', {
         'all_forms': all_forms,
         'current_form': current_form_name,
         'form_names': form_order,

@@ -18,4 +18,10 @@ urlpatterns = [
     path('vehicle/<int:vehicle_id>/print/', views.print_vehicle_report, name='print_vehicle_report'),
     path('vehicle/delete/<int:pk>/', views.delete_vehicle, name='delete_vehicle'),
 
+    path('roles-dashboard/', views.roles_dashboard, name='roles_dashboard'),
+    path('role-manage/', views.manage_roles_permissions, name='manage_roles_permissions'),
+    path('assign-role-permission/', views.assign_permissions_to_role, name='assign_permissions_to_role'),
+    path('assign-user-role/<int:user_id>', views.assign_roles_to_users, name='assign_roles_to_users'),
+
+
 ]

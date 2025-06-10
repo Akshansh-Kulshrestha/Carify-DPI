@@ -62,9 +62,9 @@ class CustomerAdmin(admin.ModelAdmin):
 
 @admin.register(Vehicle)
 class VehicleAdmin(admin.ModelAdmin):
-    list_display = ['maker', 'model', 'variant', 'vin', 'fuel_type', 'transmission', 'health_score']
+    list_display = [ 'model',  'vin', 'fuel_type', 'transmission', 'health_score']
     search_fields = ['vin', 'model', 'variant']
-    list_filter = ['maker', 'fuel_type', 'transmission', 'inspection_date']
+    list_filter = ['fuel_type', 'transmission', 'inspection_date']
     inlines = [
         OBDReadingInline,
         SystemCheckInline,
@@ -88,7 +88,7 @@ class VoltageInferenceAdmin(admin.ModelAdmin):
 
 # --- Simple Register Models ---
 simple_models = [
-    Status, VehicleMaker, VehicleFuelType, VehicleTransmission, VehicleEngineType,
+    Status, VehicleFuelType, VehicleTransmission, VehicleEngineType,
     System, NetworkArea, FluidArea, FluidRange, Parameters, Performance,
     PaintArea, TyrePosition, FlushArea, Operations, RubberArea, GlassArea,
     InteriorArea, InteriorCategory, DocumentType

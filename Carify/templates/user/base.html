@@ -23,8 +23,11 @@
   <link rel="stylesheet" href="{% static 'assests/css/vendors/animate.css' %}" />
   <link rel="stylesheet" href="{% static 'assests/css/bulk-style.css' %}" />
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="{% static '/css/admin-dash.css' %}" />
+  <link rel="stylesheet" href="{% static '/css/form-style.css' %}" />
+
   <!-- JS Scripts in Head -->
   <script src="https://kit.fontawesome.com/99a870abbd.js" crossorigin="anonymous"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -49,7 +52,7 @@
               <div style="position: absolute; top: 0; left: 0; width: 106%; height: 100%; background-color: #F04C5C; transform: skewX(-0.06turn); transform-origin: top right; z-index: 0;"></div>
 
               <div class="d-flex justify-content-between align-items-center w-100 px-3" style="position: relative; z-index: 1;">
-                <h2 class="m-0 text-white text-center flex-grow-1">User Vehicles Information</h2>
+                <h2 class="m-0 text-white text-center flex-grow-1">  {{ page_title|default:"Dashboard" }} </h2>
                 
                 <!-- Profile dropdown start -->
                 <div class="dropdown ms-3">
@@ -85,6 +88,7 @@
           <ul class="sidebar-menu pt-3" id="simple-bar">
             {% if request.user.is_authenticated %}
             {% if request.user.is_verified_by_admin %}
+
           <li class="sidebar-list {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
             <a class="sidebar-link d-flex align-items-center" href="{% url 'admin_dashboard' %}">
               <i class="fa-solid fa-house fa-lg" style="color: #F04C5C; padding-left:15px;"></i>
@@ -94,30 +98,48 @@
             {% endif %}
             {% endif %}
             {% if request.user.is_authenticated %}
-            {% if request.user.is_superuser %}
-            <li class="sidebar-list dropdown {% if request.resolver_match.url_name in 'user_list role_list' %}open active{% endif %}">
+            {% if request.user.is_admin %}
+            <li class="sidebar-list dropdown {% if request.resolver_match.url_name in 'user_dashboard manage_roles_permissions' %}open active{% endif %}">
               <a href="#" class="sidebar-link d-flex align-items-center toggle-dropdown">
                 <i class="fa-solid fa-users fa-lg" style="color: #F04C5C; padding-left:15px;"></i>
                 <span class="label-text">User Management</span>
               </a>
               <ul class="sidebar-submenu">
                 <li><a href="{%url 'user_dashboard'%}" class="sidebar-link d-flex align-items-center {% if request.resolver_match.url_name == 'user_dashboard' %}active{% endif %}"><i class="fa-solid fa-user"></i> <span>User</span></a></li>
-                <li><a href="#" class="sidebar-link d-flex align-items-center {% if request.resolver_match.url_name == 'role_list' %}active{% endif %}"><i class="fa-solid fa-user-tie"></i> <span>Roles</span></a></li>
+                {% if request.user.is_superuser %}
+                <li><a href="{%url 'roles_dashboard'%}" class="sidebar-link d-flex align-items-center {% if request.resolver_match.url_name == 'manage_roles_permissions' %}active{% endif %}"><i class="fa-solid fa-user-tie"></i> <span>Roles</span></a></li>
+                {% endif %}
               </ul>
             </li>
             {% endif %}
             {% endif %}
-
             {% if request.user.is_authenticated %}
             {% if request.user.is_verified_by_admin %}
-          <li class="sidebar-list {% if request.resolver_match.url_name == 'vehicles_inspected' %}active{% endif %}">
-            <a class="sidebar-link d-flex align-items-center" href="{% url 'vehicles_inspected' %}">
-              <i class="fa-solid fa-car fa-lg" style="color: #F04C5C; padding-left:15px;"></i>
-              <span class="label-text">Vehcile Details</span>
+            <li class="sidebar-list dropdown {% if request.resolver_match.url_name in 'vehicles_inspected vehicles_inspected_by_user' %}open active{% endif %}">
+              <a href="#" class="sidebar-link d-flex align-items-center toggle-dropdown">
+                <i class="fa-solid fa-car fa-lg" style="color: #F04C5C; padding-left:15px;"></i>
+                <span class="label-text">Vehcile Details</span>
+              </a>
+              <ul class="sidebar-submenu">
+                <li><a href="{% url 'vehicles_inspected' %}" class="sidebar-link d-flex align-items-center {% if request.resolver_match.url_name == 'vehicles_inspected' %}active{% endif %}"><i class="fa-solid fa-car-side"></i> <span>All Vehciles</span></a></li>
+                <li><a href="{%url 'vehicles_inspected_by_user' user.id %}" class="sidebar-link d-flex align-items-center {% if request.resolver_match.url_name == 'vehicles_inspected_by_user' %}active{% endif %}"><i class="fa-solid fa-user-gear"></i> <span>My Vehciles</span></a></li>
+              </ul>
+            </li>
+            {% endif %}
+            {% endif %}
+            {% if request.user.is_authenticated %}
+            {% if request.user.is_verified_by_admin %}
+
+          <li class="sidebar-list {% if request.resolver_match.url_name == 'unified_form' %}active{% endif %}">
+            <a class="sidebar-link d-flex align-items-center" href="{% url 'unified_form' %}">
+              <i class="fa-solid fa-pencil fa-lg" style="color: #F04C5C; padding-left:15px;"></i>
+              <span class="label-text">Fill PDI Form</span>
             </a>
           </li>
             {% endif %}
             {% endif %}
+
+
 
           <!-- Add more sidebar items as needed -->
           {% comment %} <li class="sidebar-list">
@@ -139,6 +161,10 @@
 {% block user %}{% endblock user %}
 {% block inspected_by_user %}{% endblock inspected_by_user %}
 {% block inspected_cars %}{% endblock inspected_cars %}
+{% block manage_roles_permissions %}{% endblock %}
+{% block roles_dashboard %}{% endblock %}
+{% block assign_roles %}{%endblock%}
+{% block form %}{% endblock form %}
 
   </div>
 
@@ -152,6 +178,8 @@
   <script src="{% static 'assests/js/slick/slick.min.js' %}"></script>
   <script src="{% static 'assests/js/slick/slick.js' %}"></script>
   <script src="{% static 'js/admin.js' %}"></script>
+  <script src="{% static 'js/form-main.js' %}"></script>
+
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     const toggleBtn = document.getElementById('toggleSidebar');

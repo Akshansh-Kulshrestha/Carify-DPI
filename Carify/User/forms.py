@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from .models import CustomUser, Roles, Permissions, Roles_Permissions
+from .models import CustomUser, Roles, Permissions, UserRole
 from django.contrib.auth.forms import PasswordResetForm
 
 # Reset Password
@@ -27,35 +27,29 @@ class CustomUserChangeForm(UserChangeForm):
 class LoginForm(forms.Form):
     email = forms.EmailField(label="Email")
     password = forms.CharField(label="Password", widget=forms.PasswordInput)
-    remember_me = forms.BooleanField(required=False)
 
-# Roles form
-class RolesForm(forms.ModelForm):
+class RoleForm(forms.ModelForm):
     class Meta:
         model = Roles
-        fields = ["name", "status"]
+        fields = ['name', 'permissions', 'status']
         widgets = {
-            "name": forms.TextInput(attrs={"class": "form-control"}),
-            "status": forms.NumberInput(attrs={"class": "form-control"}),
+            'permissions': forms.CheckboxSelectMultiple
         }
 
-
-# Permissions form
-class PermissionsForm(forms.ModelForm):
+class PermissionForm(forms.ModelForm):
     class Meta:
         model = Permissions
-        fields = ["name"]
-        widgets = {
-            "name": forms.TextInput(attrs={"class": "form-control"}),
-        }
+        fields = ['name']
 
 
-# Roles_Permissions form
-class RolesPermissionsForm(forms.ModelForm):
-    class Meta:
-        model = Roles_Permissions
-        fields = ["role", "permission"]
-        widgets = {
-            "role": forms.Select(attrs={"class": "form-control"}),
-            "permission": forms.Select(attrs={"class": "form-control"}),
-        }
+
+class UserRoleAssignForm(forms.Form):
+    role = forms.ModelChoiceField(queryset=Roles.objects.all(), label="Select Role")
+
+class RolePermissionForm(forms.Form):
+    role = forms.ModelChoiceField(queryset=Roles.objects.all(), label="Select Role")
+    permissions = forms.ModelMultipleChoiceField(
+        queryset=Permissions.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        label="Assign Permissions"
+    )

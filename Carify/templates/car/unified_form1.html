@@ -1,0 +1,765 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vehicle Pre-Delivery Inspection Report</title>
+    <link rel="stylesheet" href="{% static 'css/form-style.css'%}" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+      integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+  </head>
+  <body>
+    <!-- 1 page -->
+    <div class="container">
+      <img
+        src="https://www.carify.co.in/assets/logo-B22FtGFY.png"
+        alt="Carify Logo"
+        class="logo"
+      />
+
+      <div class="title">
+        <span class="highlight">VEHICLE PRE-DELIVERY</span><br />
+        <span class="sub-highlight">INSPECTION REPORT</span>
+      </div>
+
+      <div>
+        <div class="red-bar"></div>
+        <img
+          src="https://www.varunmaruti.com/uploads/products/colors/grandvitara-midnight-black1.png"
+          alt="Car Image"
+          class="vehicle-image"
+        />
+      </div>
+    <form method = "post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      {% if current_form == "customer" %}
+          <div class="info">
+            <div class="customer-name-info">
+              <h4>Customer Information</h4>
+              <div>
+                <span class="label"><strong>Customer Name:</strong></span>
+                <span class="customer-name">
+                  <input type="text" placeholder="Enter name" id="name" name="{{all_forms.customer.name.name}}" value="{{all_forms.customer.initial.value}}"/>
+                </span>
+              </div>
+              <div>
+                <span class="label"><strong>Customer Email:</strong></span>
+                <span class="customer-name"
+                  ><input type="email" placeholder="Enter email" id="name" name="{{all_forms.customer.email.name}}" value="{{all_forms.customer.initial.value}}"
+                /></span>
+              </div>
+              <div>
+                <span class="label"><strong>Mobile Nomber:</strong></span>
+                <span class="customer-name"
+                  ><input type="number" placeholder="Enter nomber" id="name" name="{{all_forms.customer.phone.name}}" value="{{all_forms.customer.initial.value}}"
+                /></span>
+              </div>
+
+              <button id="btn" type="submit" name="save_section" value="{{ current_form }}">Submit</button>
+            </div>
+        {% endif %}
+        <!-- 2 page -->
+<div class="container">
+      <h3>Vehicle Information</h3>
+{%if current_form == "vehicle" %}
+    <div class="grand-vitara">
+    <div class="img-box">
+      <h3>{{all_forms.vehicle.model.name}}</h3>
+      <div class="car-image">
+        <input type="file" id="carImageInput" accept="image/*" name="{{all_forms.vehicle.image.name}}">
+        <div class="gallery-preview" id="galleryPreview"></div>
+      </div>
+      <div class="tag-box">
+        <input type="text" placeholder="102 Bhp" name="{{all_forms.vehicle.bhp.name}}">
+        <input type="text" placeholder="6 Airbags" name="{{all_forms.vehicle.airbags.name}}">
+        <input type="text" placeholder="21.11 Mileage (kmpl)" name="{{all_forms.vehicle.mileage_kmpl.name}}">
+        <input type="text" placeholder="NA NCAP" name="{{all_forms.vehicle.ncap_rating.name}}">
+      </div>
+    </div>
+    <div class="header">
+        <p>PDI Report<br><small>PDI Date:  <td id="date-cell">
+                  <input type="date" id="hidden-date" onchange="updateDate()" name="{{all_forms.vehicle.inspection_date.name}}" />
+                </td><br>Conducted By:
+          <input type="text" placeholder="Dr. Prachur Joshi" name="{{all_forms.vehicle.inspected_by.name}}">
+         </small></p>
+      </div>
+</div>
+
+    <div class="section">
+      <h3>Vehicle Health Score</h3>
+      <div class="score">Health Score <input type="number" placeholder="4.8" name="{{all_forms.vehicle.health_score.name}}"></div>
+      <p>This signifies car doesn’t have any issues and is excellent running condition.</p>
+      <div class="details-grid">
+        <div><span class="info">Model:</span> <input type="text" placeholder="Maruti Suzuki Grand Vitara Delta Smart Hybrid" name="{{all_forms.vehicle.model.name}}"></div>
+        <div><span class="info">VIN:</span> <input type="text" placeholder="MBJTYKL1SSD320128 (Apr-2025)" name="{{all_forms.vehicle.vin.name}}"></div>
+        <div><span class="info">Fuel:</span> <input type="text" placeholder="Petrol" name="{{all_forms.vehicle.fuel_type.name}}"></div>
+        <div><span class="info">Transmission:</span> <input type="text" placeholder="Manual" name="{{all_forms.vehicle.transmission.name}}"></div>
+        <div><span class="info">Engine:</span><input type="text" placeholder="1462cc" name="{{all_forms.vehicle.engine_cc.name}}"></div>
+        <div><span class="info">Engine Type:</span><input type="text" placeholder="K15C + Mild Hybrid System" name="{{all_forms.vehicle.engine_type.name}}"></div>
+        <div><span class="info">#Keys:</span><input type="number" placeholder="2" name="{{all_forms.vehicle.num_keys.name}}"></div>
+      </div>
+      <div style="display: flex; justify-content: end; gap: 5px">
+            <button style="color: green">
+              <i class="fa-solid fa-arrow-left"></i> Back
+            </button>
+              <button style="color: green" id="btn" type="submit" name="save_section" value="{{ current_form }}">
+                Next <i class="fa-solid fa-arrow-right"></i>
+              </button>
+          </div>
+          {% endif %}
+    </div>
+
+    <div class="section">
+      <h3>Detailed Report</h3>
+      {% if current_form == obdreading%}
+      <table>
+        <thead>
+          <tr>
+            <th>Avg. Running For Cars In Your City (Kms)</th>
+            <th>Running & OBD Tampering</th>
+            <th>Current ODO (Kms)</th>
+            <th>OBD Reading</th>
+            <th>No OBD Tempering </th>
+
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td> <input type="number" placeholder="25" name="{{all_forms.obdreading.avg_city_running_kms.name}}"></td>
+            <td> <input type="text" placeholder="OBD Detected: 23" name="{{all_forms.obdreading.pre_delivery_odo_kms.name}}"></td>
+            <td><input type="number" value="27" name="{{all_forms.obdreading.current_odo_kms.name}}"> <small>Kms</small></td>
+            <td><input type="text" placeholder="Car reading was detected at 27 km when diagnosed through OBD." name="{{all_forms.obdreading.obd_running_kms.name}}"></td>
+            <td><input type="text" placeholder="" name="{{all_forms.obdreading.obd_tampering.name}}"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+<div style="display: flex; justify-content: end; gap: 5px">
+            <button style="color: green">
+              <i class="fa-solid fa-arrow-left"></i> Back
+            </button>
+             <button style="color: green" id="btn" type="submit" name="save_section" value="{{ current_form }}">
+                Next <i class="fa-solid fa-arrow-right"></i>
+              </button>
+          </div>
+          {% endif %}
+    </div>
+        <!-- 3 page -->
+        <section class="top">
+          <h2>
+            What Is Condition Of My Car’s <span>Core Mechanical Areas?</span>
+          </h2>
+          <!-- <p class="status">Status: <span class="ok">All OK</span></p> -->
+           
+        {% if current_form == "systemcheck" %}
+          <div class="btn-group">
+            <button onclick="clearAll('core')">Clear All</button>
+          </div>
+          <button id="create" style="margin-left: 90%; margin-top: -15px; height: 30px; outline: none; border: 1px solid white; border-radius: 5px; color: white; background-color: green;font-weight: 600;">Create <i class="fa-solid fa-plus"></i></button>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>System</th>
+                  <th>Status</th>
+                  <th>No. of Issues</th>
+                </tr>
+              </thead>
+              <tbody id="core">
+                <tr>
+                  <td>{{all_forms.systemcheck.system}}</td>
+                  <td>
+                    <select name="status" class="status-select">
+                      {% for status in statuses %}
+                        <option value="{{ status.id }}" {% if selected_status.id == status.id %}selected{% endif %}>
+                          {{ status.name }}
+                        </option>
+                      {% endfor %}
+                    </select>
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      class="issue-input"
+                      min="0"
+                      value="0"
+                      name="{{all_forms.systemcheck.number_of_issues.name}}"
+                    />
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+            <div style="display: flex; justify-content: end">
+              <button style="color: green" id="btn" type="submit" name="save_section" value="{{ current_form }}">
+                Next <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        {% endif %}
+        </section>
+
+        <!-- Sensor Ecosystem Section -->
+        <section>
+          <h2>What Is Condition Of My Car’s <span>Sensor Ecosystem?</span></h2>
+          {% if current_form == 'networksystem'%}
+          <div class="btn-group">
+            <button onclick="clearAll('core')">Clear All</button>
+          </div>
+          <button id="create-sensor" style="margin-left: 90%; margin-top: -15px; height: 30px; outline: none; border: 1px solid white; border-radius: 5px; color: white; background-color: green;font-weight: 600;">Create <i class="fa-solid fa-plus"></i></button>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Area</th>
+                  <th>Status</th>
+                  <th>Remark</th>
+                </tr>
+              </thead>
+              <tbody id="sensor">
+                <tr>
+                  <td>{{all_forms.networksystem.area}}</td>
+                  <td>
+                    <select name="status" class="status-select">
+                      {% for status in statuses %}
+                        <option value="{{ status.id }}" {% if selected_status.id == status.id %}selected{% endif %}>
+                          {{ status.name }}
+                        </option>
+                      {% endfor %}
+                    </select>
+                  </td>
+                  <td>{{all_forms.networksystem.remark}}</td>
+                </tr>
+
+              </tbody>
+            </table>
+            <div style="display: flex; justify-content: end; gap: 5px">
+              <button style="color: green">
+                <i class="fa-solid fa-arrow-left"></i> Back
+              </button>
+              <button style="color: green" id="btn" type="submit" name="save_section" value="{{ current_form }}">
+                Next <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+          {% endif %}
+        </section>
+        <!-- 4 page -->
+        <section>
+              <h2>
+                What Is My Car Performance During Idling?
+                <!-- <span class="status">Status: <span class="ok">All OK</span></span> -->
+            
+              </h2>
+              <h3>Part 1: Live Parameters</h3>
+              {% if current_form == liveparameters %}
+              <button id="create-live" style="margin-left: 90%; margin-top:-15px; height: 30px; outline: none; border: 1px solid white; border-radius: 5px; color: white; background-color: green;font-weight: 600;">Create <i class="fa-solid fa-plus"></i></button>
+              <table>
+                <thead>
+                  <tr>
+                    <th>System</th>
+                    <th>Inference</th>
+                    <th>Recommendation</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td data-label="System">{{all_forms.liveparameters.system}}</td>
+                    <td data-label="Inference">
+                    <select name="interence" id="id_interence" class="form-control">
+                      {% for item in all_forms.liveparameters.fields.interence.queryset %}
+                        <option value="{{ item.id }}" {% if all_forms.liveparameters.initial.interence == item.id %}selected{% endif %}>
+                          {{ item.name }}
+                        </option>
+                      {% endfor %}
+                    </select>
+                    </td>
+                    <td data-label="Recommendation">
+                      <input type="text" value="NIL" />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div style="display: flex; justify-content: end; gap: 5px">
+                <button style="color: green">
+                  <i class="fa-solid fa-arrow-left"></i> Back
+                </button>
+              <button style="color: green" id="btn" type="submit" name="save_section" value="{{ current_form }}">
+                Next <i class="fa-solid fa-arrow-right"></i>
+              </button>
+              </div>
+              {% endif %}
+             
+              <h3>Part 2: Other Checks</h3>
+              {% if current_form == performancecheck %}
+                <button id="other-checks" style="margin-left: 90%; margin-top:0; height: 30px; outline: none; border: 1px solid white; border-radius: 5px; color: white; background-color: green;font-weight: 600;">Create <i class="fa-solid fa-plus"></i></button>
+              <table id="other-checks-table">
+                <thead>
+                  <tr>
+                    <th>System</th>
+                    <th>Status</th>
+                    <th>Recommendation</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td data-label="System">{{all_forms.performancecheck.system}}</td>
+                    <td data-label="Status">
+                        <select name="status" class="status-select">
+                          {% for status in statuses %}
+                            <option value="{{ status.id }}" {% if selected_status.id == status.id %}selected{% endif %}>
+                              {{ status.name }}
+                            </option>
+                          {% endfor %}
+                        </select>
+                    </td>
+                    <td data-label="Recommendation">
+                      <input type="text" value="NIL" name="{{all_forms.performancecheck.recommendation.name}}" />
+                    </td>
+                  </tr>
+
+                </tbody>
+              </table>
+              <div style="display: flex; justify-content: end; gap: 5px">
+                <button style="color: green">
+                  <i class="fa-solid fa-arrow-left"></i> Back
+                </button>
+              <button style="color: green" id="btn" type="submit" name="save_section" value="{{ current_form }}">
+                Next <i class="fa-solid fa-arrow-right"></i>
+              </button>
+              </div>
+              {% endif %}
+        </section>
+
+        <section>
+          <h2>
+            How Are The Fluid Levels In My Car?
+          </h2>
+            <!-- <span class="status">Status: <span class="ok">All OK</span></span> -->
+             {%if current_form == fluidlevel %}
+             <button id="Fluid-levels" style="margin-left: 90%; margin-top: -15px; height: 30px; outline: none; border: 1px solid white; border-radius: 5px; color: white; background-color: green;font-weight: 600;">Create <i class="fa-solid fa-plus"></i></button>
+          <table>
+            <thead>
+              <tr>
+                <th>Area</th>
+                <th>Range/Condition</th>
+                <th>Contamination</th>
+                <th>Recommendation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{{all_forms.fluidlevel.area}}</td>
+                <td>{{all_forms.fluidlevel.in_range}}</td>
+                <td>
+                <select name="contamination" id="id_contamination" class="form-control">
+                  {% for item in all_forms.fluidlevel.fields.contamination.queryset %}
+                    <option value="{{ item.id }}" {% if all_forms.fluidlevel.initial.contamination == item.id %}selected{% endif %}>
+                      {{ item.name }}
+                    </option>
+                  {% endfor %}
+                </select>
+                </td>
+                <td><input type="text" value="NIL" /></td>
+              </tr>
+
+            </tbody>
+          </table>
+          <div style="display: flex; justify-content: end; gap: 5px">
+            <button style="color: green">
+              <i class="fa-solid fa-arrow-left"></i> Back
+            </button>
+              <button style="color: green" id="btn" type="submit" name="save_section" value="{{ current_form }}">
+                Next <i class="fa-solid fa-arrow-right"></i>
+              </button>
+          </div>
+          {% endif %}
+        </section>
+        <!-- 5 page -->
+        <div class="section">
+          <h3>What Is Condition Of Tyres In My Car?</h3>
+          {% if current_form == tyrecondition %}
+          <h3>Remaining Useful Life Of My Tyres</h3>
+          <div class="tyre-life-wrapper">
+            <div class="tyre-img">
+              <img
+                src="https://png.pngtree.com/png-vector/20240917/ourmid/pngtree-car-tyre-transparent-download-png-image_13856041.png"
+                alt="Tyre Image"
+              />
+            </div>
+            <div class="tyre-life">
+              <div>
+                Front Left<br /><strong
+                  ><input type="number" placeholder="99.00%" name="{{all_forms.tyrecondition.remaining_life_percent.name}}"
+                /></strong>
+              </div>
+              <div>
+                Front Right<br /><strong
+                  ><input type="number" placeholder="99.00%" name="{{all_forms.tyrecondition.remaining_life_percent.name}}"
+                /></strong>
+              </div>
+              <div>
+                Rear Left<br /><strong
+                  ><input type="number" placeholder="99.00%" name="{{all_forms.tyrecondition.remaining_life_percent.name}}"
+                /></strong>
+              </div>
+              <div>
+                Rear Right<br /><strong
+                  ><input type="number" placeholder="99.00%" name="{{all_forms.tyrecondition.remaining_life_percent.name}}"
+                /></strong>
+              </div>
+            </div>
+          </div>
+
+          <h3>What Is Information Of Tyres In My Car?</h3>
+          <button id="tyre-condition" style="margin-left: 90%; margin-top: -15px; height: 30px; outline: none; border: 1px solid white; border-radius: 5px; color: white; background-color: green;font-weight: 600;">Create <i class="fa-solid fa-plus"></i></button>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Tyre</th>
+                <th>Brand</th>
+                <th>Status</th>
+                <th>Replacement Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{{all_forms.tyrecondition.position}}</td>
+                 <td>{{all_forms.tyrecondition.brand}}</td>
+                <td>{{all_forms.tyrecondition.condition}}</td>
+                <td id="date-cell">{{all_forms.tyrecondition.manufacturing_date}}
+              </tr>
+
+            </tbody>
+          </table>
+          <div style="display: flex; justify-content: end; gap: 5px">
+            <button style="color: green">
+              <i class="fa-solid fa-arrow-left"></i> Back
+            </button>
+              <button style="color: green" id="btn" type="submit" name="save_section" value="{{ current_form }}">
+                Next <i class="fa-solid fa-arrow-right"></i>
+              </button>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="section">
+          <h3>
+            What Is The Overall Fit & Finish Of My Car?<span class="status">
+            </h3>
+            <h4>1. Paint & Finish</h4>
+            {% if current_form == paintfinish%}
+            <button id="Fit-Finish" style="margin-left: 90%;  height: 30px; outline: none; border: 1px solid white; border-radius: 5px; color: white; background-color: green;font-weight: 600;">Create <i class="fa-solid fa-plus"></i></button>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Area</th>
+                <th>Repainted</th>
+                <th>Condition</th>
+                <th>Action Recommended</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{{all_forms.paintfinish.area}}</td>
+                <td>{{all_forms.paintfinish.repainted}}</td>
+                <td>{{all_forms.paintfinish.condition}}</td>
+                <td>{{all_forms.paintfinish.action}}</td>
+              </tr>
+
+            </tbody>
+          </table>
+          
+          <div style="display: flex; justify-content: end; gap: 5px">
+            <button style="color: green">
+              <i class="fa-solid fa-arrow-left"></i> Back
+            </button>
+              <button style="color: green" id="btn" type="submit" name="save_section" value="{{ current_form }}">
+                Next <i class="fa-solid fa-arrow-right"></i>
+              </button>
+          </div>
+          {% endif %}
+        </div>
+        <!-- 6 page -->
+
+        <div class="section">
+          <h4>2. Flush & Gaps</h4>
+          {% if current_form == flushgap%}
+          <button id="Flush-gaps" style="margin-left: 90%;  height: 30px; outline: none; border: 1px solid white; border-radius: 5px; color: white; background-color: green;font-weight: 600;">Create <i class="fa-solid fa-plus"></i></button>
+          <table>
+            <thead>
+              <tr>
+                <th>Area</th>
+                <th>Operation</th>
+                <th>Observation: Gaps</th>
+                <th>Action Recommended</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Bonnet Right</td>
+                <td>Smooth</td>
+                <td>No</td>
+                <td>
+                  <select>
+                    <option>NIL</option>
+                    <option>Adjust</option>
+                  </select>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+          <div style="display: flex; justify-content: end; gap: 5px">
+            <button style="color: green">
+              <i class="fa-solid fa-arrow-left"></i> Back
+            </button>
+              <button style="color: green" id="btn" type="submit" name="save_section" value="{{ current_form }}">
+                Next <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            {% endif %}
+          </div>
+        <div class="section">
+
+          <h4>3. Critical Rubber Components</h4>
+          {% if current_form == rubbercomponent%}
+          <button id="Critical-Rubber" style="margin-left: 90%;  height: 30px; outline: none; border: 1px solid white; border-radius: 5px; color: white; background-color: green;font-weight: 600;">Create <i class="fa-solid fa-plus"></i></button>
+          <table>
+            <thead>
+              <tr>
+                <th>Area</th>
+                <th>Condition</th>
+                <th>Recommendation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{{all_forms.rubbercomponent.area}}</td>
+                <td>{{all_forms.rubbercomponent.condition}}</td>
+                <td>{{all_forms.rubbercomponent.recommendation}}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="display: flex; justify-content: end; gap: 5px">
+            <button style="color: green">
+              <i class="fa-solid fa-arrow-left"></i> Back
+            </button>
+              <button style="color: green" id="btn" type="submit" name="save_section" value="{{ current_form }}">
+                Next <i class="fa-solid fa-arrow-right"></i>
+              </button>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+        <!-- 7 page -->
+        <div class="section">
+          <h3>
+            What Is Condition Of Glass Related Components In My Car?
+          </h3>
+          {% if current_form == glasscomponent%}
+          <button id="Condition-of-class" style="margin-left: 90%;  height: 30px; outline: none; border: 1px solid white; border-radius: 5px; color: white; background-color: green;font-weight: 600;">Create <i class="fa-solid fa-plus"></i></button>
+          <table>
+            <thead>
+              <tr>
+                <th>Area</th>
+                <th>Brand</th>
+                <th>Condition</th>
+                <th>Recommendation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{{all_forms.glasscomponent.area}}</td>
+                <td>{{all_forms.glasscomponent.brand}}</td>
+                <td>{{all_forms.glasscomponent.condition}}</td>
+                <td>{{all_forms.glasscomponent.recommendation}}</td>
+              </tr>
+
+            </tbody>
+          </table>
+          <div style="display: flex; justify-content: end; gap: 5px">
+            <button style="color: green">
+              <i class="fa-solid fa-arrow-left"></i> Back
+            </button>
+              <button style="color: green" id="btn" type="submit" name="save_section" value="{{ current_form }}">
+                Next <i class="fa-solid fa-arrow-right"></i>
+              </button>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="section">
+          <h3>What Is The Condition Of My Car’s Interiors & Upholstery?</h3>
+
+          {%if current_form == interiorcomponent %}
+          <h4>
+            Part 1: Floor Carpets 
+            <button id="Floor-Carpets" style="margin-left: 90%;  height: 30px; outline: none; border: 1px solid white; border-radius: 5px; color: white; background-color: green;font-weight: 600;">Create <i class="fa-solid fa-plus"></i></button>
+          </h4>
+          <table>
+            <thead>
+              <tr>
+                <th>Area</th>
+                <th>Condition</th>
+                <th>Recommendation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{{all_forms.interiorcomponent.area}}</td>
+                <td>{{all_forms.interiorcomponent.condition}}</td>
+                <td>{{all_forms.interiorcomponent.recommendation}}</td>
+              </tr>
+
+            </tbody>
+          </table>
+          <div style="display: flex; justify-content: end; gap: 5px">
+            <button style="color: green">
+              <i class="fa-solid fa-arrow-left"></i> Back
+            </button>
+              <button style="color: green" id="btn" type="submit" name="save_section" value="{{ current_form }}">
+                Next <i class="fa-solid fa-arrow-right"></i>
+              </button>
+          </div>
+
+          <h4>
+            Part 2: Plastic Panels <span class="status"><button id="Plastic-Panels" style=" height:30px; outline: none; border: 1px solid white; border-radius: 5px; color: white; background-color: green;font-weight: 600;">Create <i class="fa-solid fa-plus"></i></button></span>
+          </h4>
+          <table>
+            <thead>
+              <tr>
+                <th>Area</th>
+                <th>Condition</th>
+                <th>Recommendation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{{all_forms.interiorcomponent.area}}</td>
+                <td>{{all_forms.interiorcomponent.condition}}</td>
+                <td>{{all_forms.interiorcomponent.recommendation}}</td>
+              </tr>
+
+            </tbody>
+          </table>
+          <div style="display: flex; justify-content: end; gap: 5px">
+            <button style="color: green">
+              <i class="fa-solid fa-arrow-left"></i> Back
+            </button>
+              <button style="color: green" id="btn" type="submit" name="save_section" value="{{ current_form }}">
+                Next <i class="fa-solid fa-arrow-right"></i>
+              </button>
+          </div>
+        </div>
+
+        <!-- 8 page -->
+        <div class="section">
+          <h3>Part 3: Fabric/Leather</h3>
+           <button id="Fabric-Leather" style="margin-left: 90%; height: 30px; outline: none; border: 1px solid white; border-radius: 5px; color: white; background-color: green;font-weight: 600;">Create <i class="fa-solid fa-plus"></i></button>
+          <table id="fabric-table">
+            <thead>
+              <tr>
+                <th>Area</th>
+                <th>Condition</th>
+                <th>Recommendation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{{all_forms.interiorcomponent.area}}</td>
+                <td>{{all_forms.interiorcomponent.condition}}</td>
+                <td>{{all_forms.interiorcomponent.recommendation}}</td>
+              </tr>
+
+            </tbody>
+          </table>
+          <div style="display: flex; justify-content: end; gap: 5px">
+            <button style="color: green">
+              <i class="fa-solid fa-arrow-left"></i> Back
+            </button>
+              <button style="color: green" id="btn" type="submit" name="save_section" value="{{ current_form }}">
+                Next <i class="fa-solid fa-arrow-right"></i>
+              </button>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="section">
+          <h3>Are My Vehicle Documentation In Order?</h3>
+          {% if current_form == documentation%}
+           <button id="Vehicle-Documentation" style="margin-left: 90%; height: 30px; outline: none; border: 1px solid white; border-radius: 5px; color: white; background-color: green;font-weight: 600;">Create <i class="fa-solid fa-plus"></i></button>
+          <table>
+            <thead>
+              <tr>
+                <th>System</th>
+                <th>Status</th>
+                <th>Remark</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{{all_forms.documentation.document}}</td>
+                <td>{{all_forms.documentation.status}}</td>
+                <td>{{all_forms.documentation.remark}}</td>
+              </tr>
+
+            </tbody>
+          </table>
+          <div style="display: flex; justify-content: end">
+              <button style="color: green" id="btn" type="submit" name="save_section" value="{{ current_form }}">
+                Submit
+              </button>
+          </div>
+          {% endif %}
+        </div>
+    </form>
+        <!-- footer -->
+
+        <div class="disclaimer-box">
+          <div class="logo-section">
+            <img
+              src="https://www.carify.co.in/assets/logo-B22FtGFY.png"
+              alt="Carify Logo"
+              class="carify-logo"
+            />
+          </div>
+
+          <div class="disclaimer-section">
+            <h1>Disclaimer :</h1>
+            <ul>
+              <li>
+                All readings provided in this report have been verified through
+                our tools and manual inspections to the best of our knowledge.
+                Please note that readings may vary between different brands and
+                models.
+              </li>
+              <li>
+                This report reflects the vehicle’s condition prior to delivery.
+                No claims or liabilities can be accepted for any issues that
+                arise after the vehicle has been delivered.
+              </li>
+              <li>
+                The inspection is based on a specific set of criteria and may
+                not encompass all potential vehicle issues. Additional checks
+                may be necessary for comprehensive assessment. Carify reserves
+                the right to update or modify inspection protocols and processes
+                without prior notice.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="{% static 'js/form-main.js' %}"></script>
+  </body>
+</html>

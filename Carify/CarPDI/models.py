@@ -14,11 +14,7 @@ class Status(models.Model):
     def __str__(self):
         return self.name
     
-class VehicleMaker(models.Model):
-    name = models.CharField(max_length=100)
-    def __str__(self):
-        return self.name
-    
+
 class VehicleFuelType(models.Model):
     name = models.CharField(max_length=100)
     def __str__(self):
@@ -38,11 +34,7 @@ class Vehicle(models.Model):
 
     image = models.ImageField(upload_to='cars')
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    old_car = models.BooleanField()
-    new_car = models.BooleanField()
-    maker = models.ForeignKey(VehicleMaker, on_delete=models.CASCADE)
     model = models.CharField(max_length=100)
-    variant = models.CharField(max_length=100)
     vin = models.CharField(max_length=50, unique=True)
     fuel_type = models.ForeignKey(VehicleFuelType, on_delete=models.CASCADE)
     transmission = models.ForeignKey(VehicleTransmission, on_delete=models.CASCADE)
@@ -58,7 +50,7 @@ class Vehicle(models.Model):
     health_score = models.FloatField()
 
     def __str__(self):
-        return f"{self.maker} - {self.model} - {self.variant}"
+        return f"{self.model} - {self.model} - {self.vin}"
     
 class OBDReading(models.Model):
     vehicle = models.OneToOneField(Vehicle, on_delete=models.CASCADE)

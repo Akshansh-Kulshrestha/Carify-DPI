@@ -17,7 +17,7 @@ class VehicleForm(forms.ModelForm):
 
     class Meta:
         model = Vehicle
-        fields = [ 'old_car','new_car','image','maker', 'model', 'variant', 'vin', 'fuel_type',
+        fields = [ 'image', 'model',  'vin', 'fuel_type',
             'transmission', 'engine_cc', 'engine_type', 'bhp', 'airbags',
             'mileage_kmpl', 'ncap_rating', 'num_keys', 'inspection_date',
             'inspected_by', 'health_score']

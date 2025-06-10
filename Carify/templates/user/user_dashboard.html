@@ -59,8 +59,8 @@
                               <!-- Show Unverify button if already verified -->
                               <a href="{% url 'unverify_user' user.id %}" class="btn btn-sm btn-warning"
                                 onclick="return confirm('Unverify this user?');" title="Unverify User">
-                                <i class="fa-solid fa-circle-xmark"></i>
-                              </a>
+                                  <i class="bi bi-person-slash"></i>     
+                                </a>
                             {% else %}
                               <!-- Show Verify button if not verified -->
                               <a href="{% url 'verify_user' user.id %}" target="_blank" class="btn btn-success btn-sm" title="Verify User">
@@ -71,9 +71,11 @@
                           <a href="{%url 'vehicles_inspected_by_user' user.id%}" class="btn btn-primary btn-sm" title="Vehicle Inspected">
                             <i class="bx bx-car"></i>
                           </a>
-                          <a href="{%url 'delete_user' user.id%}" class="btn btn-danger btn-sm" title="Delete User" onclick="return confirm('Are you sure you want to delete this user?');">
-                            <i class="bx bx-trash"></i>
+
+                          <a href="{% url 'assign_roles_to_users' user.id %}" class="btn btn-info btn-sm" title="Assign Roles">
+                              <i class="bi bi-person-add"></i>  
                           </a>
+
                         </div>
                       </td>
                     </tr>
