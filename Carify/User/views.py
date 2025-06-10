@@ -283,6 +283,8 @@ def roles_dashboard(request):
         'roles': roles,
         'grouped_permissions': grouped_permissions,
         'user_roles': user_roles,
+        'page_title': 'Roles Dashboard'
+
     })
 
 
