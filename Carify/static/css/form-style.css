@@ -31,17 +31,6 @@ body {
   margin: 20vh 0 0 60vh;
 }
 
-.red-bar {
-  width: 70px;
-  height: 350px;
-  background-color: #e83058;
-  position: absolute;
-  right: 45vh;
-  top: 36vh;
-  transform: rotate(35deg);
-  z-index: -1;
-}
-
 .info {
   margin-top: -50vh;
 }
@@ -53,6 +42,7 @@ body {
   background-color: #fdfcfc;
   border-radius: 20px;
   cursor: pointer;
+  margin-bottom: 20px;
 }
 
 .customer-name-info:hover {
@@ -100,167 +90,70 @@ body {
   border-radius: 5px;
   transition-duration: 2s;
 }
+/* ------- Responsive Media Queries ------- */
+@media (max-width: 1024px) {
+  .logo {
+    margin-left: 5px;
+  }
 
-@media (max-width: 668px) {
-  .red-bar {
-    display: none;
+  .title {
+    margin-left: 85vh;
+    margin-top: -45px;
   }
   .vehicle-image {
-    margin: 0;
+    width: 80%;
+    margin-left: 90vh;
+  }
+
+  .customer-name-info {
+    margin-top: -60vh;
+  }
+
+  #name {
+    height: 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 2rem;
+    margin-left: 60vh;
+    margin-top: -10vh;
   }
   .logo {
-    margin: 15px;
-    margin-right: 20%;
+    margin-left: 0;
   }
-  .title {
-    text-align: center;
-    margin: 15px;
-    font-size: medium;
+
+  .vehicle-image {
+    width: 40%;
+    margin-left: 25rem;
   }
-  .info {
-  margin-top: 0;
-}
-.customer-name-info {
-  width: auto;
-  margin: 0 20px;
-}
-#btn{
-  margin-left: 50%;
-}
 }
 
-@media (min-width: 668px){
- .red-bar {
+@media (max-width: 480px) {
+  .logo {
+    width: 120px;
+    margin-left: 5px;
+  }
+
+  .title {
+    font-size: 1rem;
+    margin-left: 35vh;
+    margin-top: -32px;
+  }
+  .vehicle-image {
     display: none;
   }
-    .vehicle-image {
-    margin-left: 90vh;
-    width: 350px;
+
+  .customer-name-info {
+    width: auto;
+    margin-top: 55vh;
   }
-    .logo {
-    margin: 15px;
-    /* margin-right: 20%; */
+
+  #name {
+    height: 32px;
   }
-    .title {
-    /* text-align: center; */
-    margin-left: 82vh;
-    margin-top: -15vh;
-    font-size: x-large;
-  }
-    .info {
-  margin-top: -70vh;
 }
-.customer-name-info {
-  width: 350px;
-  margin: 0 10px;
-}
-#btn{
-  margin-left: 50%;
-}
-}
-
-@media (min-width: 1024px) {
-  .red-bar {
-    display: block;
-  }
- .container {
-  max-width: 1000px;
-  margin: 0 auto;
-  border: 1px solid #ddd;
-  padding: 20px;
-}
-.logo {
-  width: auto;
-  margin: 25px 0 0 100vh;
-}
-.title {
-  font-size: 35px;
-  font-weight: bold;
-  margin: 30px 0 0 50px;
-}
-.highlight {
-  color: #e83058;
-}
-.sub-highlight {
-  color: #000;
-}
-.vehicle-image {
-  width: 90%;
-  max-width: 500px;
-  margin: 20vh 0 0 60vh;
-}
-
-.red-bar {
-  width: 70px;
-  height: 350px;
-  background-color: #e83058;
-  position: absolute;
-  right: 45vh;
-  top: 36vh;
-  transform: rotate(35deg);
-  z-index: -1;
-}
-
-.info {
-  margin-top: -50vh;
-}
-
-.customer-name-info {
-  flex-wrap: wrap;
-  height: 350px;
-  width: 400px;
-  background-color: #fdfcfc;
-  border-radius: 20px;
-  cursor: pointer;
-}
-
-.customer-name-info:hover {
-  background-color: #eeecec;
-  transition-duration: 2s;
-}
-
-.customer-name-info h4 {
-  color: lightblue;
-  text-align: center;
-  font-size: x-large;
-  line-height: 1.6;
-  padding-top: 10px;
-  text-decoration: underline;
-}
-.label strong {
-  margin: 0 20px;
-  color: rgb(119, 198, 224);
-}
-
-#name {
-  width: 80%;
-  height: 30px;
-  padding-left: 5px;
-  margin: 5px 20px;
-  outline: none;
-  color: black;
-}
-
-#btn {
-  color: rgb(119, 198, 224);
-  height: 40px;
-  width: 100px;
-  margin-left: 60%;
-  margin-top: 10px;
-  font-size: large;
-  font-weight: 600;
-  cursor: pointer;
-}
-#btn:hover {
-  color: #fff;
-  background-color: rgb(160, 160, 233);
-  font-size: medium;
-  border: 1px solid rgb(147, 147, 231);
-  border-radius: 5px;
-  transition-duration: 2s;
-}
-}
-
 
 /* 3 page */
 * {

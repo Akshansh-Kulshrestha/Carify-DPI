@@ -71,9 +71,11 @@
 {%if current_form == "vehicle" %}
     <div class="grand-vitara">
     <div class="img-box">
-      <h3>{{all_forms.vehicle.model.name}}</h3>
+      <h3>Model Name</h3>
+
+      <h3>{{all_forms.vehicle.model}}</h3>
       <div class="car-image">
-        <input type="file" id="carImageInput" accept="image/*" name="{{all_forms.vehicle.image.name}}">
+       {{ all_forms.vehicle.image}}
         <div class="gallery-preview" id="galleryPreview"></div>
       </div>
       <div class="tag-box">
@@ -86,8 +88,7 @@
     <div class="header">
         <p>PDI Report<br><small>PDI Date:  <td id="date-cell">
                   <input type="date" id="hidden-date" onchange="updateDate()" name="{{all_forms.vehicle.inspection_date.name}}" />
-                </td><br>Conducted By:
-          <input type="text" placeholder="Dr. Prachur Joshi" name="{{all_forms.vehicle.inspected_by.name}}">
+                </td><br><p>Conducted By: {{ request.user.get_full_name }}</p>
          </small></p>
       </div>
 </div>
@@ -99,14 +100,41 @@
       <div class="details-grid">
         <div><span class="info">Model:</span> <input type="text" placeholder="Maruti Suzuki Grand Vitara Delta Smart Hybrid" name="{{all_forms.vehicle.model.name}}"></div>
         <div><span class="info">VIN:</span> <input type="text" placeholder="MBJTYKL1SSD320128 (Apr-2025)" name="{{all_forms.vehicle.vin.name}}"></div>
-        <div><span class="info">Fuel:</span> <input type="text" placeholder="Petrol" name="{{all_forms.vehicle.fuel_type.name}}"></div>
-        <div><span class="info">Transmission:</span> <input type="text" placeholder="Manual" name="{{all_forms.vehicle.transmission.name}}"></div>
-        <div><span class="info">Engine:</span><input type="text" placeholder="1462cc" name="{{all_forms.vehicle.engine_cc.name}}"></div>
+        <div>         
+          <span class="info">Fuel:</span>
+          <button type="button" id="fuelShowBtn"onclick="showAddFuelModal()" class="btn btn-sm btn-outline-primary">+ Add</button>
+                  {{ all_forms.vehicle.fuel_type }}
+        </div>
+
+                <!-- Fuel Modal -->
+                <div id="fuelModal" style="display: none; position: fixed; top: 30%; left: 40%; background: white; padding: 20px; border: 1px solid #ccc; z-index: 999;">
+                  <h5>Add Fuel Type</h5>
+                  <input type="text" id="newFuelName" placeholder="Enter fuel type" />
+                  <button type="button" id="fuelSubmitBtn">Add</button>
+                  <button type="button" id="fuelHideBtn">Cancel</button>
+                </div>
+                <div >
+                  <span class="info">Transmission:</span> 
+                  <button type="button" onclick="showAddTransmissionModal()" class="btn btn-sm btn-outline-primary">
+                    + Add
+                  </button>
+                  {{ all_forms.vehicle.transmission }}
+                </div>
+
+        <!-- Modal -->
+        <div id="transmissionModal" style="display: none; position: fixed; top: 30%; left: 40%; background: white; padding: 20px; border: 1px solid #ccc; z-index: 999;">
+          <h5>Add Transmission</h5>
+          <input type="text" id="newTransmissionName" placeholder="Transmission Name">
+          <button onclick="submitNewTransmission()">Add</button>
+          <button onclick="hideAddTransmissionModal()">Cancel</button>
+        </div>
+
+        <div><span class="info">Engine CC:</span><input type="text" placeholder="1462cc" name="{{all_forms.vehicle.engine_cc.name}}"></div>
         <div><span class="info">Engine Type:</span><input type="text" placeholder="K15C + Mild Hybrid System" name="{{all_forms.vehicle.engine_type.name}}"></div>
         <div><span class="info">#Keys:</span><input type="number" placeholder="2" name="{{all_forms.vehicle.num_keys.name}}"></div>
       </div>
       <div style="display: flex; justify-content: end; gap: 5px">
-            <button style="color: green">
+            <button style="color: green" id="btn" type="submit" name="navigate_previous" value="{{ current_form }}">
               <i class="fa-solid fa-arrow-left"></i> Back
             </button>
               <button style="color: green" id="btn" type="submit" name="save_section" value="{{ current_form }}">
