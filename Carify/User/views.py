@@ -20,46 +20,9 @@ from .forms import RegistrationForm, LoginForm, RoleForm, PermissionForm,  UserR
 
 # Role management utilities
 from .permission import assign_role_to_user, assign_permission_to_role, user_has_permission
+from django.contrib import messages
 
 User = get_user_model()
-
-# ========== Authentication Views ==========
-
-def register_view(request):
-    if request.method == 'POST':
-        form = RegistrationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('login')
-    else:
-        form = RegistrationForm()
-    return render(request, 'user/register.html', {'form': form})
-
-
-def login_view(request):
-    if request.method == 'POST':
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            email = form.cleaned_data.get('email')
-            password = form.cleaned_data.get('password')
-            remember_me = form.cleaned_data.get('remember_me')
-            user = authenticate(request, email=email, password=password)
-            if user:
-                login(request, user)
-                if not remember_me:
-                    request.session.set_expiry(6000)
-                return redirect('admin_dashboard')
-            else:
-                form.add_error(None, "Invalid email or password.")
-    else:
-        form = LoginForm()
-    return render(request, 'user/login.html', {'form': form})
-
-
-def logout_view(request):
-    logout(request)
-    return redirect('login')
-
 
 # ========== Access Control Decorators ==========
 
@@ -71,6 +34,60 @@ def is_staff(user):
 
 def is_both(user):
     return user.is_authenticated and user.is_superuser and user.is_staff
+
+# ========== Authentication Views ==========
+
+@login_required
+@user_passes_test(is_both)
+def register_view(request):
+    if request.method == 'POST':
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Registration successful. Share credentials to the user after verifying.')
+            return redirect('user_dashboard')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = RegistrationForm()
+    return render(request, 'user/register.html', {'form': form})
+
+
+
+def login_view(request):
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data.get('email')
+            password = form.cleaned_data.get('password')
+            remember_me = form.cleaned_data.get('remember_me')
+            user = authenticate(request, email=email, password=password)
+
+            if user:
+                # ✅ Superusers and staff bypass verification
+                if user.is_superuser or user.is_staff or user.is_verified_by_admin:
+                    login(request, user)
+                    if not remember_me:
+                        request.session.set_expiry(6000)
+                    messages.success(request, f'Welcome {user.get_full_name() or user.email}!')
+                    return redirect('admin_dashboard')
+                else:
+                    messages.error(request, "Your account is not verified by admin yet.")
+            else:
+                messages.error(request, "Invalid email or password.")
+    else:
+        form = LoginForm()
+    return render(request, 'user/login.html', {'form': form})
+
+
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
+
+
+
 
 
 # ========== Dashboard View ==========
