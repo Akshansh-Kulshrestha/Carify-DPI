@@ -1,4 +1,4 @@
-# views.py
+
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, get_user_model
@@ -67,7 +67,7 @@ def is_admin(user):
     return user.is_authenticated and user.is_staff
 
 def is_staff(user):
-    return user.is_authenticated and user.is_verified_by_admin
+    return user.is_authenticated and (user.is_verified_by_admin or user.is_superuser)
 
 def is_both(user):
     return user.is_authenticated and user.is_superuser and user.is_staff

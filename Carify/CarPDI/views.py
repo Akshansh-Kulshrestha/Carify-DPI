@@ -1,159 +1,175 @@
-from .forms import (
-    CustomerForm, VehicleForm, OBDReadingForm, SystemCheckForm, NetworkSystemForm,
-    FluidLevelForm, PerformanceCheckForm, PaintFinishForm, TyreConditionForm,
-    FlushGapForm, RubberComponentForm, GlassComponentForm, InteriorComponentForm,
-    DocumentationForm, LiveParameterForm
-)
-from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse
-from .models import *
-from django.contrib import messages
+# views/customer_view.py
 from django.http import JsonResponse
+from django.forms.models import model_to_dict
 from django.views.decorators.csrf import csrf_exempt
-
-
-FORM_CLASSES = {
-    'customer': CustomerForm,
-    'vehicle': VehicleForm,
-    'obdreading': OBDReadingForm,
-    'systemcheck': SystemCheckForm,
-    'networksystem': NetworkSystemForm,
-    'fluidlevel': FluidLevelForm,
-    'liveparameters': LiveParameterForm,
-    'performancecheck': PerformanceCheckForm,
-    'paintfinish': PaintFinishForm,
-    'tyrecondition': TyreConditionForm,
-    'flushgap': FlushGapForm,
-    'rubbercomponent': RubberComponentForm,
-    'glasscomponent': GlassComponentForm,
-    'interiorcomponent': InteriorComponentForm,
-    'documentation': DocumentationForm,
-}
-
-
-
+from .forms import *
+from .models import *
 from django.utils import timezone
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse
-from django.contrib import messages
+from django.shortcuts import get_object_or_404, render, redirect
 
-@login_required
-def unified_form_view(request):
-    form_order = list(FORM_CLASSES.keys())
-    current_form_name = request.GET.get('form', 'customer')
-    FormClass = FORM_CLASSES[current_form_name]
-
+@csrf_exempt
+def customer_view(request):
+    
     if request.method == 'POST':
-        current_form_name = request.POST.get('save_section') or request.POST.get('navigate_previous')
-        FormClass = FORM_CLASSES[current_form_name]
-        current_form = FormClass(request.POST, request.FILES)
-
-        customer_id = request.session.get('customer_id')
-        vehicle_id = request.session.get('vehicle_id')
-
-        # Validation
-        if current_form_name == 'vehicle' and not customer_id:
-            messages.error(request, "Please fill out the Customer form first.")
-            return redirect(reverse('unified_form') + '?form=customer')
-
-        if current_form_name not in ['customer', 'vehicle'] and not vehicle_id:
-            messages.error(request, "Please fill out the Vehicle form first.")
-            return redirect(reverse('unified_form') + '?form=vehicle')
-
-        if current_form.is_valid():
-            instance = current_form.save(commit=False)
-
-            if current_form_name == 'vehicle':
-                instance.customer = get_object_or_404(Customer, id=customer_id)
-                if not instance.inspected_by_id:
-                    instance.inspected_by = request.user
-                if not instance.inspection_date:
-                    instance.inspection_date = timezone.now().date()
-
-            if current_form_name not in ['customer', 'vehicle']:
-                instance.vehicle = get_object_or_404(Vehicle, id=vehicle_id)
-
-            instance.save()
-
-            if current_form_name == 'customer':
-                request.session['customer_id'] = instance.id
-
-            if current_form_name == 'vehicle':
-                request.session['vehicle_id'] = instance.id
-
-            if 'save_section' in request.POST:
-                next_index = form_order.index(current_form_name) + 1
-                if next_index < len(form_order):
-                    next_form = form_order[next_index]
-                    return redirect(reverse('unified_form') + f'?form={next_form}')
-                else:
-                    messages.success(request, "All sections completed successfully.")
-                    request.session.pop('customer_id', None)
-                    request.session.pop('vehicle_id', None)
-                    return redirect('success')
-
-        if 'navigate_previous' in request.POST:
-            if current_form_name in form_order:
-                current_index = form_order.index(current_form_name)
-                if current_index > 0:
-                    prev_form = form_order[current_index - 1]
-                    return redirect(reverse('unified_form') + f'?form={prev_form}')
-
+        form = CustomerForm(request.POST)
+        if form.is_valid():
+            customer = form.save()  # ✅ always create new customer
+            request.session['customer_id'] = customer.id  # ✅ store in session
+            return redirect('form_vehicle')  # ✅ redirect to vehicle form view
     else:
-        # GET request
-        initial_data = {}
+        form = CustomerForm()
 
-        if current_form_name == 'vehicle':
-            customer_id = request.session.get('customer_id')
-            if customer_id:
-                initial_data['customer'] = customer_id
-            initial_data['inspection_date'] = timezone.now().date()
-            initial_data['inspected_by'] = request.user.id
-
-        if current_form_name not in ['customer', 'vehicle']:
-            vehicle_id = request.session.get('vehicle_id')
-            if vehicle_id:
-                initial_data['vehicle'] = vehicle_id
-
-        current_form = FormClass(initial=initial_data)
-
-    all_forms = {
-        name: (current_form if name == current_form_name else FORM_CLASSES[name]())
-        for name in form_order
-    }
-
-    return render(request, 'car/unified_form1.html', {
-        'all_forms': all_forms,
-        'current_form': current_form_name,
-        'form_names': form_order,
+    # 🟡 Always return a response, even after POST fails
+    return render(request, 'car/index.html', {
+        'form': form,
+        'current_form': 'customer'
     })
 
+
+@csrf_exempt
+def vehicle_view(request):
+    customer_id = request.session.get('customer_id')
+    if not customer_id:
+        return JsonResponse({
+            'success': False,
+            'message': 'Customer ID not found in session.',
+            'redirect': '/carify/form/customer/'
+        }, status=400)
+
+    customer = get_object_or_404(Customer, id=customer_id)
+    instance = Vehicle.objects.filter(customer_id=customer_id).first()
+
+    if request.method == 'POST':
+        request.POST = request.POST.copy()  # ✅ Make mutable immediately
+
+        # TRANSMISSION
+        custom_transmission = request.POST.get('custom_transmission')
+        selected_transmission = request.POST.get('transmission')
+        if custom_transmission and selected_transmission == '__custom__':
+            trans_type, _ = VehicleTransmission.objects.get_or_create(
+                name__iexact=custom_transmission,
+                defaults={'name': custom_transmission}
+            )
+            request.POST['transmission'] = trans_type.id
+
+        # ENGINE
+        custom_engine = request.POST.get('custom_engine')
+        selected_engine = request.POST.get('engine_type')
+        if custom_engine and selected_engine == '__custom__':
+            eng_type, _ = VehicleEngineType.objects.get_or_create(
+                name__iexact=custom_engine,
+                defaults={'name': custom_engine}
+            )
+            request.POST['engine_type'] = eng_type.id
+
+        # FUEL
+        custom_fuel = request.POST.get('custom_fuel')
+        selected_fuel_id = request.POST.get('fuel_type')
+        if custom_fuel and selected_fuel_id == '__custom__':
+            fuel_type, _ = VehicleFuelType.objects.get_or_create(
+                name__iexact=custom_fuel,
+                defaults={'name': custom_fuel}
+            )
+            request.POST['fuel_type'] = fuel_type.id
+
+        form = VehicleForm(request.POST, request.FILES, instance=instance)
+        if form.is_valid():
+            vehicle = form.save(commit=False)
+            vehicle.customer = customer
+            if not vehicle.inspection_date:
+                vehicle.inspection_date = timezone.now().date()
+            if not vehicle.inspected_by_id:
+                vehicle.inspected_by = request.user
+            vehicle.save()
+            request.session['vehicle_id'] = vehicle.id
+            return redirect ('form_obdreading')
+
+    else:
+        initial_data = {
+            'customer': customer_id,
+            'inspection_date': timezone.now().date(),
+            'inspected_by': request.user.id,
+        }
+        form = VehicleForm(instance=instance, initial=initial_data)
+        return render(request, 'car/index.html', {
+            'form': form,
+            'current_form': 'vehicle',
+            'fuel_types': VehicleFuelType.objects.all(),
+            'transmission_types': VehicleTransmission.objects.all(),
+            'engine_types': VehicleEngineType.objects.all(),
+            'customer': customer
+        })
+
+
+
+@csrf_exempt
+def obdreading_view(request):
+    vehicle_id = request.session.get('vehicle_id')
+    if not vehicle_id:
+        return JsonResponse({
+            'success': False,
+            'message': 'Vehicle ID not found in session.',
+            'redirect': '/carify/form/vehicle/'
+        }, status=400)
+
+    instance = OBDReading.objects.filter(vehicle_id=vehicle_id).first()
+    vehicle = get_object_or_404(Vehicle, id=vehicle_id)
+
+    if request.method == 'POST':
+        form = OBDReadingForm(request.POST, instance=instance)
+        if form.is_valid():
+            obd = form.save(commit=False)
+            obd.vehicle = get_object_or_404(Vehicle, id=vehicle_id)
+            obd.save()
+            return redirect('form_systemcheck')
+    else:
+        form = OBDReadingForm(instance=instance)
+        return render(request, 'car/index.html', {'form': form, 'current_form': 'obdreading', 'vehicle': vehicle})
 
 def success_view(request):
     return render(request, 'car/success.html')
 
+from .models import System, Status
+
 @csrf_exempt
-def add_transmission_ajax(request):
-    if request.method == "POST":
-        name = request.POST.get("name")
-        if name:
-            transmission = VehicleTransmission.objects.create(name=name)
-            return JsonResponse({
-                "status": "success",
-                "id": transmission.id,
-                "name": transmission.name
-            })
-        return JsonResponse({"status": "error", "message": "Name is required."})
+def systemcheck_view(request):
+    vehicle_id = request.session.get('vehicle_id')
+    if not vehicle_id:
+        return JsonResponse({
+            'success': False,
+            'message': 'Vehicle ID not found in session.',
+            'redirect': '/carify/form/vehicle/'
+        }, status=400)
 
-@csrf_exempt  # or use @require_POST and CSRF token properly
-def add_fuel_type_ajax(request):
-    if request.method == "POST":
-        name = request.POST.get("name")
-        if not name:
-            return JsonResponse({"status": "error", "message": "Fuel name required"})
+    vehicle = get_object_or_404(Vehicle, id=vehicle_id)
 
-        obj, created = VehicleFuelType.objects.get_or_create(name=name)
-        return JsonResponse({"status": "success", "id": obj.id, "name": obj.name})
+    if request.method == 'POST':
+        systems = request.POST.getlist('system')
+        statuses = request.POST.getlist('status')
+        issues = request.POST.getlist('number_of_issues')
 
-    return JsonResponse({"status": "error", "message": "Invalid request"}, status=400)
+        for sys, stat, num in zip(systems, statuses, issues):
+            system = get_object_or_404(System, id=sys)
+            status = get_object_or_404(Status, id=stat)
+            SystemCheck.objects.create(
+                vehicle=vehicle,
+                system=system,
+                status=status,
+                number_of_issues=int(num)
+            )
+
+        return JsonResponse({
+            'success': True,
+            'message': 'System checks saved successfully.',
+            'next_url': '/carify/form/some_next_form/'
+        })
+
+    systems = System.objects.all()
+    statuses = Status.objects.all()
+    return render(request, 'car/index.html', {
+        'current_form': 'systemcheck',
+        'systems': systems,
+        'statuses': statuses,
+        'vehicle': vehicle,
+    })
+
