@@ -36,39 +36,40 @@
           class="vehicle-image"
         />
       </div>
-    <form method = "post" enctype="multipart/form-data">
+    <form method = "post" enctype="multipart/form-data" action="{% url 'form_customer' %}">
       {% csrf_token %}
 
-      {% if current_form == "customer" %}
           <div class="info">
             <div class="customer-name-info">
               <h4>Customer Information</h4>
               <div>
                 <span class="label"><strong>Customer Name:</strong></span>
                 <span class="customer-name">
-                  <input type="text" placeholder="Enter name" id="name" name="{{all_forms.customer.name.name}}" value="{{all_forms.customer.initial.value}}"/>
+                  <input type="text" placeholder="Enter name" id="name" name="{{form.name.name}}" value="{{form.initial.value}}"/>
                 </span>
               </div>
               <div>
                 <span class="label"><strong>Customer Email:</strong></span>
                 <span class="customer-name"
-                  ><input type="email" placeholder="Enter email" id="name" name="{{all_forms.customer.email.name}}" value="{{all_forms.customer.initial.value}}"
+                  ><input type="email" placeholder="Enter email" id="name" name="{{form.email.name}}" value="{{form.initial.value}}"
                 /></span>
               </div>
               <div>
                 <span class="label"><strong>Mobile Nomber:</strong></span>
                 <span class="customer-name"
-                  ><input type="number" placeholder="Enter nomber" id="name" name="{{all_forms.customer.phone.name}}" value="{{all_forms.customer.initial.value}}"
+                  ><input type="number" placeholder="Enter nomber" id="name" name="{{form.phone.name}}" value="{{form.initial.value}}"
                 /></span>
               </div>
 
-              <button id="btn" type="submit" name="save_section" value="{{ current_form }}">Submit</button>
+              <button id="btn" type="submit">Submit</button>
             </div>
-        {% endif %}
-        <!-- 2 page -->
+          </form> 
+          
+          <!-- 2 page -->
 <div class="container">
+      <form method = "post" enctype="multipart/form-data" action="{% url 'form_vehicle' %}">
+      {% csrf_token %}
       <h3>Vehicle Information</h3>
-{%if current_form == "vehicle" %}
     <div class="grand-vitara">
     <div class="img-box">
       <h3>Model Name</h3>
@@ -92,7 +93,6 @@
          </small></p>
       </div>
 </div>
-
     <div class="section">
       <h3>Vehicle Health Score</h3>
       <div class="score">Health Score <input type="number" placeholder="4.8" name="{{all_forms.vehicle.health_score.name}}"></div>
@@ -130,8 +130,10 @@
         </div>
 
         <div><span class="info">Engine CC:</span><input type="text" placeholder="1462cc" name="{{all_forms.vehicle.engine_cc.name}}"></div>
-        <div><span class="info">Engine Type:</span><input type="text" placeholder="K15C + Mild Hybrid System" name="{{all_forms.vehicle.engine_type.name}}"></div>
-        <div><span class="info">#Keys:</span><input type="number" placeholder="2" name="{{all_forms.vehicle.num_keys.name}}"></div>
+         <div> <span class="info">Engine Type:</span>
+                  {{ all_forms.vehicle.engine_type }}
+        </div>       
+         <div><span class="info">#Keys:</span><input type="number" placeholder="2" name="{{all_forms.vehicle.num_keys.name}}"></div>
       </div>
       <div style="display: flex; justify-content: end; gap: 5px">
             <button style="color: green" id="btn" type="submit" name="navigate_previous" value="{{ current_form }}">
@@ -141,8 +143,8 @@
                 Next <i class="fa-solid fa-arrow-right"></i>
               </button>
           </div>
-          {% endif %}
     </div>
+  </form>
 
     <div class="section">
       <h3>Detailed Report</h3>

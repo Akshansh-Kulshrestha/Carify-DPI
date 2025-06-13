@@ -86,7 +86,6 @@
 
           <ul class="sidebar-menu pt-3" id="simple-bar">
             {% if request.user.is_authenticated %}
-            {% if request.user.is_verified_by_admin %}
 
           <li class="sidebar-list {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
             <a class="sidebar-link d-flex align-items-center" href="{% url 'admin_dashboard' %}">
@@ -94,7 +93,6 @@
               <span class="label-text">Dashboard</span>
             </a>
           </li>
-            {% endif %}
             {% endif %}
             {% if request.user.is_authenticated %}
             {% if request.user.is_admin %}
@@ -113,7 +111,6 @@
             {% endif %}
             {% endif %}
             {% if request.user.is_authenticated %}
-            {% if request.user.is_verified_by_admin %}
             <li class="sidebar-list dropdown {% if request.resolver_match.url_name in 'vehicles_inspected vehicles_inspected_by_user' %}open active{% endif %}">
               <a href="#" class="sidebar-link d-flex align-items-center toggle-dropdown">
                 <i class="fa-solid fa-car fa-lg" style="color: #F04C5C; padding-left:15px;"></i>
@@ -121,16 +118,17 @@
               </a>
               <ul class="sidebar-submenu">
                 <li><a href="{% url 'vehicles_inspected' %}" class="sidebar-link d-flex align-items-center {% if request.resolver_match.url_name == 'vehicles_inspected' %}active{% endif %}"><i class="fa-solid fa-car-side"></i> <span>All Vehciles</span></a></li>
+                {% if request.user.is_verified_by_admin %}
                 <li><a href="{%url 'vehicles_inspected_by_user' user.id %}" class="sidebar-link d-flex align-items-center {% if request.resolver_match.url_name == 'vehicles_inspected_by_user' %}active{% endif %}"><i class="fa-solid fa-user-gear"></i> <span>My Vehciles</span></a></li>
+                {% endif %}
               </ul>
             </li>
-            {% endif %}
             {% endif %}
             {% if request.user.is_authenticated %}
             {% if request.user.is_verified_by_admin %}
 
-          <li class="sidebar-list {% if request.resolver_match.url_name == 'unified_form' %}active{% endif %}">
-            <a class="sidebar-link d-flex align-items-center" href="{% url 'unified_form' %}">
+          <li class="sidebar-list {% if request.resolver_match.url_name == 'form_customer' %}active{% endif %}">
+            <a class="sidebar-link d-flex align-items-center" href="{% url 'form_customer' %}">
               <i class="fa-solid fa-pencil fa-lg" style="color: #F04C5C; padding-left:15px;"></i>
               <span class="label-text">Fill PDI Form</span>
             </a>

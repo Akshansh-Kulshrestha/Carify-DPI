@@ -1,4 +1,4 @@
-# views.py
+
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, get_user_model
@@ -20,20 +20,38 @@ from .forms import RegistrationForm, LoginForm, RoleForm, PermissionForm,  UserR
 
 # Role management utilities
 from .permission import assign_role_to_user, assign_permission_to_role, user_has_permission
+from django.contrib import messages
 
 User = get_user_model()
 
+# ========== Access Control Decorators ==========
+
+def is_admin(user):
+    return user.is_authenticated and user.is_staff
+
+def is_staff(user):
+    return user.is_authenticated and (user.is_verified_by_admin or user.is_superuser)
+
+def is_both(user):
+    return user.is_authenticated and user.is_superuser and user.is_staff
+
 # ========== Authentication Views ==========
 
+@login_required
+@user_passes_test(is_both)
 def register_view(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('login')
+            messages.success(request, 'Registration successful. Share credentials to the user after verifying.')
+            return redirect('user_dashboard')
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
         form = RegistrationForm()
     return render(request, 'user/register.html', {'form': form})
+
 
 
 def login_view(request):
@@ -44,16 +62,24 @@ def login_view(request):
             password = form.cleaned_data.get('password')
             remember_me = form.cleaned_data.get('remember_me')
             user = authenticate(request, email=email, password=password)
+
             if user:
-                login(request, user)
-                if not remember_me:
-                    request.session.set_expiry(6000)
-                return redirect('admin_dashboard')
+                # ✅ Superusers and staff bypass verification
+                if user.is_superuser or user.is_staff or user.is_verified_by_admin:
+                    login(request, user)
+                    if not remember_me:
+                        request.session.set_expiry(6000)
+                    messages.success(request, f'Welcome {user.get_full_name() or user.email}!')
+                    return redirect('admin_dashboard')
+                else:
+                    messages.error(request, "Your account is not verified by admin yet.")
             else:
-                form.add_error(None, "Invalid email or password.")
+                messages.error(request, "Invalid email or password.")
     else:
         form = LoginForm()
     return render(request, 'user/login.html', {'form': form})
+
+
 
 
 def logout_view(request):
@@ -61,16 +87,7 @@ def logout_view(request):
     return redirect('login')
 
 
-# ========== Access Control Decorators ==========
 
-def is_admin(user):
-    return user.is_authenticated and user.is_staff
-
-def is_staff(user):
-    return user.is_authenticated and user.is_verified_by_admin
-
-def is_both(user):
-    return user.is_authenticated and user.is_superuser and user.is_staff
 
 
 # ========== Dashboard View ==========
