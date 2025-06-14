@@ -1,23 +1,6 @@
-document.getElementById('create').addEventListener('click', function () {
-  const tbody = document.getElementById('core');
-  const systems = `{% for s in systems %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}`;
-  const statuses = `{% for st in statuses %}<option value="{{ st.id }}">{{ st.name }}</option>{% endfor %}`;
 
-  const row = document.createElement('tr');
-  row.innerHTML = `
-    <td>
-      <select name="system" class="system-select">${systems}</select>
-    </td>
-    <td>
-      <select name="status" class="status-select">${statuses}</select>
-    </td>
-    <td>
-      <input type="number" name="number_of_issues" class="issue-input" min="0" value="0" />
-    </td>
-  `;
-  tbody.appendChild(row);
-});
 
+//vehicle form code
 document.addEventListener("DOMContentLoaded", function () {
   const dropdowns = [
     { select: "fuelDropdown", input: "customFuelInput" },
@@ -43,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-
+// pramod sir code
 const carImageInput = document.getElementById('carImageInput');
     const galleryPreview = document.getElementById('galleryPreview');
 

@@ -106,13 +106,51 @@ class FluidLevel(models.Model):
     recommendation = models.CharField(max_length=100)
 
 class VoltageInference(models.Model):
-    voltage = models.CharField (max_length=20)
-    engine_state = models.CharField(max_length=20)
-    interence = models.CharField(max_length=70)
-    recommendation = models.CharField(max_length=100)
+    ENGINE_STATE_CHOICES = [
+    ("Off", "Off"),
+    ("On", "On"),
+    ("On (idling)", "On (idling)"),
+]
+
+    VOLTAGE_CHOICES = [
+        ("< 11.8 V", "< 11.8 V"),
+        ("11.8 – 12.0 V", "11.8 – 12.0 V"),
+        ("12.1 – 12.3 V", "12.1 – 12.3 V"),
+        ("12.4 – 12.7 V", "12.4 – 12.7 V"),
+        ("> 12.7 V", "> 12.7 V"),
+        ("13.7 – 14.7 V", "13.7 – 14.7 V"),
+        ("< 13.5 V", "< 13.5 V"),
+        ("> 14.8 V", "> 14.8 V"),
+    ]
+
+    INFERENCE_CHOICES = [
+        ("Severely discharged battery", "Severely discharged battery"),
+        ("Low battery charge", "Low battery charge"),
+        ("Partially charged battery", "Partially charged battery"),
+        ("Normal resting voltage (healthy battery)", "Normal resting voltage (healthy battery)"),
+        ("Possibly overcharged or surface charge present", "Possibly overcharged or surface charge present"),
+        ("Normal charging voltage from alternator", "Normal charging voltage from alternator"),
+        ("Weak alternator or poor charging", "Weak alternator or poor charging"),
+        ("Overcharging – regulator or alternator fault possible", "Overcharging – regulator or alternator fault possible"),
+    ]
+
+    RECOMMENDATION_CHOICES = [
+        ("Recharge or replace battery immediately", "Recharge or replace battery immediately"),
+        ("Recharge soon, monitor usage", "Recharge soon, monitor usage"),
+        ("May require charging", "May require charging"),
+        ("NIL", "NIL"),
+        ("Recheck after load applied", "Recheck after load applied"),
+        ("Check alternator and connections", "Check alternator and connections"),
+        ("Inspect voltage regulator/alternator", "Inspect voltage regulator/alternator"),
+    ]
+
+    voltage = models.CharField(max_length=20, choices=VOLTAGE_CHOICES)
+    engine_state = models.CharField(max_length=20, choices=ENGINE_STATE_CHOICES)
+    interence = models.CharField(max_length=70, choices=INFERENCE_CHOICES)
+    recommendation = models.CharField(max_length=100, choices=RECOMMENDATION_CHOICES)
 
     def __str__(self):
-        return f"{self.voltage} {self.engine_state} {self.interence} {self.recommendation}"
+        return f"{self.voltage}, {self.engine_state}, {self.interence}, {self.recommendation}"
 
 class Parameters(models.Model):
     name = models.CharField(max_length=100)
@@ -145,13 +183,10 @@ class PaintArea(models.Model):
 
 class PaintFinish(models.Model):
 
-    STATUS_CHOICES = [('all ok','All Ok'),
-                             ('not ok','Not Ok'),
-                             ('NA', 'NA'),
-                             ]
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
     area = models.ForeignKey(PaintArea, on_delete=models.CASCADE)
-    repainted = models.BooleanField()
+    repainted = models.BooleanField(default=False)
+
     condition = models.ForeignKey(Status, on_delete=models.CASCADE)
     action = models.CharField(max_length=100)
 
@@ -184,7 +219,7 @@ class FlushGap(models.Model):
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
     area = models.ForeignKey(FlushArea, on_delete=models.CASCADE)
     operation = models.ForeignKey(Operations, on_delete=models.CASCADE)
-    observation_gap = models.BooleanField()
+    observation_gap = models.CharField(max_length=20)
     action = models.CharField(max_length=100)
 
 class RubberArea(models.Model):
