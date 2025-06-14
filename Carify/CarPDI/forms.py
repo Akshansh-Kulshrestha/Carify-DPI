@@ -59,6 +59,8 @@ class PaintFinishForm(forms.ModelForm):
     class Meta:
         model = PaintFinish
         fields = [ 'area', 'repainted', 'condition', 'action']
+        repainted = forms.BooleanField(required=False)
+
 
 class TyreConditionForm(forms.ModelForm):
     class Meta:

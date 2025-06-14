@@ -17,7 +17,7 @@ from reportlab.pdfgen import canvas
 from CarPDI.models import Vehicle, Customer
 from .models import CustomUser, Roles, Permissions, UserRole
 from .forms import RegistrationForm, LoginForm, RoleForm, PermissionForm,  UserRoleAssignForm, RolePermissionForm
-
+from CarPDI.models import *
 # Role management utilities
 from .permission import assign_role_to_user, assign_permission_to_role, user_has_permission
 from django.contrib import messages
@@ -107,25 +107,25 @@ def admin_dashboard(request):
             'label': 'Total Customers',
             'icon': 'fa-users',
             'value': total_customers,
-            'width': total_customers * 10,
+            'width': total_customers * 1,
         },
         {
             'label': 'Total Vehicles',
             'icon': 'fa-car',
             'value': total_vehicles,
-            'width': total_vehicles * 10,
+            'width': total_vehicles * 1,
         },
         {
             'label': 'Avg. Health Score',
             'icon': 'fa-heart-pulse',
-            'value': avg_health_score,
-            'width': avg_health_score,
+            'value': f'{avg_health_score}/5.0',
+            'width': avg_health_score * 20,
         },
         {
             'label': 'Recent Inspections',
             'icon': 'fa-clipboard-check',
             'value': recent_inspections,
-            'width': recent_inspections * 10,
+            'width': recent_inspections * 1,
         },
     ]
 
@@ -139,21 +139,28 @@ def admin_dashboard(request):
 
 # ========== Vehicle Views ==========
 
-def print_vehicle_report(request, vehicle_id):
+def print_view(request, vehicle_id):
     vehicle = get_object_or_404(Vehicle, id=vehicle_id)
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="vehicle_report_{vehicle_id}.pdf"'
-    p = canvas.Canvas(response)
-    p.setFont("Helvetica-Bold", 16)
-    p.drawString(100, 800, "Vehicle Inspection Report")
-    p.setFont("Helvetica", 12)
-    p.drawString(100, 770, f"Customer Name: {vehicle.customer.name}")
-    p.drawString(100, 750, f"Vehicle: {vehicle.maker} {vehicle.model}")
-    p.drawString(100, 730, f"Health Score: {vehicle.health_score}")
-    p.drawString(100, 710, f"Inspection Date: {vehicle.inspection_date.strftime('%Y-%m-%d')}")
-    p.showPage()
-    p.save()
-    return response
+
+    context = {
+        'vehicle': vehicle,
+        'customer': vehicle.customer,
+        'obd': OBDReading.objects.filter(vehicle=vehicle).first(),
+        'system_checks': SystemCheck.objects.filter(vehicle=vehicle),
+        'network_systems': NetworkSystem.objects.filter(vehicle=vehicle),
+        'fluid_levels': FluidLevel.objects.filter(vehicle=vehicle),
+        'live_parameters': LiveParameters.objects.filter(vehicle=vehicle),
+        'performance_checks': PerformanceCheck.objects.filter(vehicle=vehicle),
+        'paint_finishes': PaintFinish.objects.filter(vehicle=vehicle),
+        'tyre_conditions': TyreCondition.objects.filter(vehicle=vehicle),
+        'flush_gaps': FlushGap.objects.filter(vehicle=vehicle),
+        'rubber_components': RubberComponent.objects.filter(vehicle=vehicle),
+        'glass_components': GlassComponent.objects.filter(vehicle=vehicle),
+        'interior_components': InteriorComponent.objects.filter(vehicle=vehicle),
+        'documentations': Documentation.objects.filter(vehicle=vehicle),
+    }
+
+    return render(request, 'car/print.html', context)
 
 
 def delete_vehicle(request, pk):

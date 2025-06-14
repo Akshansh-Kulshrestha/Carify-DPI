@@ -5,11 +5,7 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Dashboard</title>
-
-  <link rel="icon" href="{% static 'images/favicon.png' %}" type="image/x-icon" />
-  <link rel="shortcut icon" href="{% static 'images/favicon.png' %}" type="image/x-icon" />
-
+  <title>Carify</title>
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet" />
@@ -96,7 +92,7 @@
             {% endif %}
             {% if request.user.is_authenticated %}
             {% if request.user.is_admin %}
-            <li class="sidebar-list dropdown {% if request.resolver_match.url_name in 'user_dashboard manage_roles_permissions' %}open active{% endif %}">
+            <li class="sidebar-list dropdown {% if request.resolver_match.url_name in 'user_dashboard roles_dashboard' %}open active{% endif %}">
               <a href="#" class="sidebar-link d-flex align-items-center toggle-dropdown">
                 <i class="fa-solid fa-users fa-lg" style="color: #F04C5C; padding-left:15px;"></i>
                 <span class="label-text">User Management</span>
@@ -104,7 +100,7 @@
               <ul class="sidebar-submenu">
                 <li><a href="{%url 'user_dashboard'%}" class="sidebar-link d-flex align-items-center {% if request.resolver_match.url_name == 'user_dashboard' %}active{% endif %}"><i class="fa-solid fa-user"></i> <span>User</span></a></li>
                 {% if request.user.is_superuser %}
-                <li><a href="{%url 'roles_dashboard'%}" class="sidebar-link d-flex align-items-center {% if request.resolver_match.url_name == 'manage_roles_permissions' %}active{% endif %}"><i class="fa-solid fa-user-tie"></i> <span>Roles</span></a></li>
+                <li><a href="{%url 'roles_dashboard'%}" class="sidebar-link d-flex align-items-center {% if request.resolver_match.url_name == 'roles_dashboard' %}active{% endif %}"><i class="fa-solid fa-user-tie"></i> <span>Roles</span></a></li>
                 {% endif %}
               </ul>
             </li>
