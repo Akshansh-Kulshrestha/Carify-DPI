@@ -45,9 +45,11 @@ class Vehicle(models.Model):
     mileage_kmpl = models.FloatField()
     ncap_rating = models.CharField(max_length=20, null=True, blank=True)
     num_keys = models.IntegerField()
-    inspection_date = models.DateField()
+    inspection_date = models.DateField(auto_now_add=True)
     inspected_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='inspected_vehicles')
     health_score = models.FloatField()
+    is_completed = models.BooleanField(default=False) 
+
 
     def __str__(self):
         return f"{self.model} - {self.model} - {self.vin}"
@@ -106,48 +108,11 @@ class FluidLevel(models.Model):
     recommendation = models.CharField(max_length=100)
 
 class VoltageInference(models.Model):
-    ENGINE_STATE_CHOICES = [
-    ("Off", "Off"),
-    ("On", "On"),
-    ("On (idling)", "On (idling)"),
-]
 
-    VOLTAGE_CHOICES = [
-        ("< 11.8 V", "< 11.8 V"),
-        ("11.8 – 12.0 V", "11.8 – 12.0 V"),
-        ("12.1 – 12.3 V", "12.1 – 12.3 V"),
-        ("12.4 – 12.7 V", "12.4 – 12.7 V"),
-        ("> 12.7 V", "> 12.7 V"),
-        ("13.7 – 14.7 V", "13.7 – 14.7 V"),
-        ("< 13.5 V", "< 13.5 V"),
-        ("> 14.8 V", "> 14.8 V"),
-    ]
-
-    INFERENCE_CHOICES = [
-        ("Severely discharged battery", "Severely discharged battery"),
-        ("Low battery charge", "Low battery charge"),
-        ("Partially charged battery", "Partially charged battery"),
-        ("Normal resting voltage (healthy battery)", "Normal resting voltage (healthy battery)"),
-        ("Possibly overcharged or surface charge present", "Possibly overcharged or surface charge present"),
-        ("Normal charging voltage from alternator", "Normal charging voltage from alternator"),
-        ("Weak alternator or poor charging", "Weak alternator or poor charging"),
-        ("Overcharging – regulator or alternator fault possible", "Overcharging – regulator or alternator fault possible"),
-    ]
-
-    RECOMMENDATION_CHOICES = [
-        ("Recharge or replace battery immediately", "Recharge or replace battery immediately"),
-        ("Recharge soon, monitor usage", "Recharge soon, monitor usage"),
-        ("May require charging", "May require charging"),
-        ("NIL", "NIL"),
-        ("Recheck after load applied", "Recheck after load applied"),
-        ("Check alternator and connections", "Check alternator and connections"),
-        ("Inspect voltage regulator/alternator", "Inspect voltage regulator/alternator"),
-    ]
-
-    voltage = models.CharField(max_length=20, choices=VOLTAGE_CHOICES)
-    engine_state = models.CharField(max_length=20, choices=ENGINE_STATE_CHOICES)
-    interence = models.CharField(max_length=70, choices=INFERENCE_CHOICES)
-    recommendation = models.CharField(max_length=100, choices=RECOMMENDATION_CHOICES)
+    voltage = models.CharField(max_length=20)
+    engine_state = models.CharField(max_length=20)
+    interence = models.CharField(max_length=70)
+    recommendation = models.CharField(max_length=100)
 
     def __str__(self):
         return f"{self.voltage}, {self.engine_state}, {self.interence}, {self.recommendation}"
@@ -201,7 +166,6 @@ class TyreCondition(models.Model):
     position = models.ForeignKey(TyrePosition, on_delete=models.CASCADE)
     brand = models.CharField(max_length=50)
     condition = models.ForeignKey(Status, on_delete=models.CASCADE)
-    manufacturing_date = models.DateField()
     remaining_life_percent = models.FloatField()
 
 class FlushArea(models.Model):

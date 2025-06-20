@@ -110,14 +110,17 @@
                 PDI Report<br /><small
                   >PDI Date:
                   <td id="date-cell">
-                    <input
-                      type="date"
-                      id="hidden-date"
-                      onchange="updateDate()"
-                      name="inspection_date"
-                    />
+                    {% if vehicle %}
+                      {% if vehicle.inspection_date %}
+                        {{ vehicle.inspection_date }}
+                      {% else %}
+                        No inspection date set
+                      {% endif %}
+                    {% else %}
+                      Submit vehicle form 
+                    {% endif %}
                   </td>
-                  <br />Conducted By:
+                    <br />Conducted By:
                   {{ request.user.get_full_name }}
                         <input type="hidden" name="inspected_by" value="{{ request.user.id }}" />
 
@@ -564,7 +567,6 @@
                 <th>Tyre</th>
                 <th>Brand</th>
                 <th>Status</th>
-                <th>Replacement Date</th>
                 <th>Remaining Life (in %)</th>
               </tr>
             </thead>
@@ -581,7 +583,7 @@
                     </select>
                     <input type="text" name="custom_condition" class="customConditionInput" style="display:none;" placeholder="Enter condition" />
                   </td>
-                  <td><input type="date" name="manufacturing_date" /></td>
+                   
                     <td><input type="number" name="remaining_life_percent" placeholder="e.g. 95.0" step="0.1" /></td>
 
                 </tr>
@@ -597,7 +599,7 @@
     </select>
     <input type="text" name="custom_condition" class="customConditionInput" style="display:none;" placeholder="Enter condition" />
   </td>
-  <td><input type="date" name="manufacturing_date" /></td>
+   
   <td><input type="number" name="remaining_life_percent" placeholder="e.g. 95.0" step="0.1" /></td>
 </tr>
 <tr>
@@ -612,7 +614,7 @@
     </select>
     <input type="text" name="custom_condition" class="customConditionInput" style="display:none;" placeholder="Enter condition" />
   </td>
-  <td><input type="date" name="manufacturing_date" /></td>
+   
     <td><input type="number" name="remaining_life_percent" placeholder="e.g. 95.0" step="0.1" /></td>
 
  
@@ -629,7 +631,7 @@
     </select>
     <input type="text" name="custom_condition" class="customConditionInput" style="display:none;" placeholder="Enter condition" />
   </td>
-  <td><input type="date" name="manufacturing_date" /></td>
+   
   <td><input type="number" name="remaining_life_percent" placeholder="e.g. 95.0" step="0.1" /></td>
 </tr>
 <tr>
@@ -644,7 +646,7 @@
     </select>
     <input type="text" name="custom_condition" class="customConditionInput" style="display:none;" placeholder="Enter condition" />
   </td>
-  <td><input type="date" name="manufacturing_date" /></td>
+   
   <td><input type="number" name="remaining_life_percent" placeholder="e.g. 95.0" step="0.1" /></td>
 </tr>
 
@@ -756,12 +758,8 @@
             <option value="No">No</option>
           </select>
         </td>
-        <td>
-          <select name="action">
-            <option>NIL</option>
-            <option>Adjust</option>
-          </select>
-        </td>
+        <td><input type="text" name="action" value="NIL" /></td>
+
       </tr>
     </tbody>
   </table>
@@ -822,12 +820,7 @@
         </select>
         <input type="text" name="custom_condition" class="customConditionInput" placeholder="Enter custom condition" style="display: none;">
       </td>
-      <td>
-        <select name="recommendation">
-          <option value="NIL">NIL</option>
-          <option value="Replace">Replace</option>
-        </select>
-      </td>
+      <td><input type="text" name="action" value="NIL" /></td>
     </tr>
   </tbody>
           </table>
@@ -880,12 +873,7 @@
             </select>
             <input type="text" name="custom_condition" class="customConditionInput" style="display:none;" placeholder="Custom Condition">
           </td>
-          <td>
-            <select name="recommendation">
-              <option value="NIL">NIL</option>
-              <option value="Replace">Replace</option>
-            </select>
-          </td>
+          <td><input type="text" name="action" value="NIL" /></td>
         </tr>
       </tbody>
     </table>

@@ -1,0 +1,61 @@
+{% extends "user/base.html" %}
+{% block title %}Apply for Leave{% endblock %}
+
+{% block leave_form %}
+<div class="container mt-5">
+<form method="post">
+  {% csrf_token %}
+  <label>Start Date</label>
+  <input type="date" name="{{ form.start_date.name }}" min="{{ today }}" required>
+
+  <label>End Date</label>
+  <input type="date" name="{{ form.end_date.name }}" min="{{ today }}" required>
+
+  <label>Reason</label>
+  <input type="text" name="{{ form.reason.name }}" required>
+
+  <button type="submit" class="btn btn-success">Submit Leave Request</button>
+  <a href="{% url 'profile' %}" class="btn btn-secondary">Cancel</a>
+</form>
+
+
+<div class="container mt-5">
+  
+</div>
+
+  <table class="table table-bordered table-striped">
+    <thead class="table">
+      <tr>
+        <th>User</th>
+        <th>Start</th>
+        <th>End</th>
+        <th>Reason</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for leave in leaves %}
+        <tr>
+          <td>{{ leave.user.get_full_name }}</td>
+          <td>{{ leave.start_date }}</td>
+          <td>{{ leave.end_date }}</td>
+          <td>{{ leave.reason }}</td>
+          <td>
+            {% if leave.status == 'pending' %}
+              <span class="badge bg-warning text-dark">Pending</span>
+            {% elif leave.status == 'approved' %}
+              <span class="badge bg-success">Approved</span>
+            {% else %}
+              <span class="badge bg-danger">Rejected</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="6" class="text-center">No leave requests found.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

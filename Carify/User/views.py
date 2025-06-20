@@ -3,20 +3,23 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib import messages
 from django.contrib.sessions.models import Session
 from django.utils import timezone
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count, Sum, ExpressionWrapper, DurationField, F, Q
 from datetime import datetime, timedelta
 from django.core.exceptions import ObjectDoesNotExist
-
+import requests
+from django.conf import settings
 from reportlab.pdfgen import canvas
+from datetime import date
+
 
 # Custom app models and forms
 from CarPDI.models import Vehicle, Customer
-from .models import CustomUser, Roles, Permissions, UserRole
-from .forms import RegistrationForm, LoginForm, RoleForm, PermissionForm,  UserRoleAssignForm, RolePermissionForm
+from .models import CustomUser, Roles, Permissions, UserRole, Leave
+from .forms import *
 from CarPDI.models import *
 # Role management utilities
 from .permission import assign_role_to_user, assign_permission_to_role, user_has_permission
@@ -101,8 +104,40 @@ def admin_dashboard(request):
     recent_inspections = Vehicle.objects.filter(inspection_date__gte=datetime.today() - timedelta(days=7)).count()
 
     vehicles = Vehicle.objects.select_related('customer').all()
+    users = CustomUser.objects.all()
+    
+    total_users = users.count()
+    active_user_ids = get_active_user_ids()
+    active_users = users.filter(id__in=active_user_ids).count()
+    inactive_users = total_users - active_users
+    verified_users = users.filter(is_verified_by_admin=True).count()
 
     dashboard_cards = [
+        {
+            'label': 'Total Users',
+            'icon': 'fa-users',
+            'value': total_users,
+            'width': total_users * 1,
+        },
+        {
+            'label': 'Active Users',
+            'icon': 'fa-user-check',
+            'value': active_users,
+            'width': active_users * 1,
+        },
+        {
+            'label': 'Inactive Users',
+            'icon': 'fa-user-slash',
+            'value': inactive_users,
+            'width': inactive_users * 1,
+        },
+        {
+            'label': 'Verified by Admin',
+            'icon': 'fa-user-shield',
+            'value': verified_users,
+            'width': verified_users * 1,
+        },
+
         {
             'label': 'Total Customers',
             'icon': 'fa-users',
@@ -118,7 +153,7 @@ def admin_dashboard(request):
         {
             'label': 'Avg. Health Score',
             'icon': 'fa-heart-pulse',
-            'value': f'{avg_health_score}/5.0',
+            'value': f'{avg_health_score:.1f}/5.0',
             'width': avg_health_score * 20,
         },
         {
@@ -172,66 +207,99 @@ def delete_vehicle(request, pk):
 @login_required
 def vehicles_inspected_by_single_user(request, user_id):
     user = get_object_or_404(CustomUser, id=user_id)
-    vehicles = Vehicle.objects.filter(inspected_by=user).order_by('-inspection_date')
+
+    model_query = request.GET.get('model', '')
+    date_query = request.GET.get('date', '')
+
+    vehicles = Vehicle.objects.filter(inspected_by=user)
+
+    if model_query:
+        vehicles = vehicles.filter(model__icontains=model_query)
+
+    if date_query:
+        vehicles = vehicles.filter(inspection_date=date_query)
+
+    vehicles = vehicles.order_by('-inspection_date')
+
     return render(request, 'car/inspected_by_user.html', {
         'inspector': user,
         'vehicles': vehicles,
-        'page_title': 'My Vehicles'
+        'model_query': model_query,
+        'date_query': date_query,
+        'page_title': 'My Vehicles',
     })
-
 
 @login_required
 def vehicles_inspected(request):
-    vehicles = Vehicle.objects.all().order_by('-inspection_date')
+    model_name_query = request.GET.get('model', '')
+    inspection_date_query = request.GET.get('date', '')
+
+    vehicles = Vehicle.objects.all()
+
+    if model_name_query:
+        vehicles = vehicles.filter(model__icontains=model_name_query)
+
+    if inspection_date_query:
+        vehicles = vehicles.filter(inspection_date=inspection_date_query)
+
+    vehicles = vehicles.order_by('-inspection_date')
+
     return render(request, 'car/inspected_cars.html', {
         'vehicles': vehicles,
-        'page_title': 'All Vehicles'
+        'page_title': 'All Vehicles',
+        'model_name_query': model_name_query,
+        'inspection_date_query': inspection_date_query,
     })
+
 
 
 # ========== User Management ==========
 
+from django.db.models import Sum, ExpressionWrapper, DurationField, F
+from django.utils.timezone import localdate
+
+def format_duration(duration):
+    if not duration:
+        return "00:00:00"
+    total_seconds = int(duration.total_seconds())  # truncate microseconds
+    hours = total_seconds // 3600
+    minutes = (total_seconds % 3600) // 60
+    seconds = total_seconds % 60
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+
 @login_required
 @user_passes_test(is_admin)
 def user_dashboard(request):
-    users = CustomUser.objects.annotate(vehicle_count=Count('inspected_vehicles'))
-    total_users = users.count()
-    active_user_ids = get_active_user_ids()
-    active_users = users.filter(id__in=active_user_ids).count()
-    inactive_users = total_users - active_users
-    verified_users = users.filter(is_verified_by_admin=True).count()
+    today = localdate()
+    search_query = request.GET.get('search', '')
+    
+    users_qs = CustomUser.objects.all()
+    if search_query:
+        users_qs = users_qs.filter(email__icontains=search_query)
 
-    dashboard_cards = [
-        {
-            'label': 'Total Users',
-            'icon': 'fa-users',
-            'value': total_users,
-            'width': total_users * 10,
-        },
-        {
-            'label': 'Active Users',
-            'icon': 'fa-user-check',
-            'value': active_users,
-            'width': active_users * 10,
-        },
-        {
-            'label': 'Inactive Users',
-            'icon': 'fa-user-slash',
-            'value': inactive_users,
-            'width': inactive_users * 10,
-        },
-        {
-            'label': 'Verified by Admin',
-            'icon': 'fa-user-shield',
-            'value': verified_users,
-            'width': verified_users * 10,
-        },
-    ]
+    users = users_qs.annotate(
+        vehicle_count=Count('inspected_vehicles'),
+        total_login_duration=Sum(
+            ExpressionWrapper(
+                F('sessions__logout_time') - F('sessions__login_time'),
+                output_field=DurationField()
+            )
+        )
+    )
 
+    # Process each user to calculate login duration string and today’s vehicle count
+    for user in users:
+        user.total_login_duration_str = format_duration(user.total_login_duration)
+
+        today_vehicles_qs = user.inspected_vehicles.filter(inspection_date=today)
+        user.today_vehicles = today_vehicles_qs
+        user.today_vehicle_count = today_vehicles_qs.count()
+ 
     return render(request, 'user/user_dashboard.html', {
-        'dashboard_cards': dashboard_cards,
         'users': users,
+        'users1': users_qs,
         'page_title': 'User Management',
+        'search_query': search_query,
     })
 
 
@@ -273,6 +341,138 @@ def delete_user_view(request, user_id):
     user_obj.delete()
     messages.success(request, 'User deleted successfully.')
     return redirect('user_dashboard')
+
+def leave_calendar_view(request, user_id):
+    user = CustomUser.objects.get(id=user_id)
+    leaves = user.leaves.all()
+    return render(request, 'user/leave_calender.html', {'user': user, 'leaves': leaves, 'page_title': 'Leave Calendar'})
+
+from django.http import JsonResponse
+from .models import Leave
+
+@login_required
+def leave_events_json(request, user_id):
+    leaves = Leave.objects.filter(user__id=user_id)
+    events = []
+
+    for leave in leaves:
+        if leave.status == 'approved':
+            color = 'green'
+        elif leave.status == 'pending':
+            color = 'orange'
+        else:
+            color = 'red'
+
+        events.append({
+            'title': leave.status.title(),
+            'start': leave.start_date.isoformat(),
+            'end': (leave.end_date + timedelta(days=1)).isoformat(),  # FullCalendar is exclusive on end
+            'color': color,
+        })
+
+    return JsonResponse(events, safe=False)
+
+
+@login_required
+def profile_view(request):
+    user = request.user
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('profile')
+    else:
+        form = UserProfileForm(instance=user)
+
+    return render(request, 'user/profile.html', {'form': form, 'user': user, 'page_title' : 'Profile'})  
+
+def verify_bank_details(request):
+    if request.method == 'POST':
+        account_number = request.POST.get('account_number')
+        ifsc_code = request.POST.get('ifsc_code')
+
+        api_url = "https://api.example.com/bank/verify"
+        headers = {
+            'Authorization': f'Bearer {settings.BANK_VERIFICATION_API_KEY}',
+            'Content-Type': 'application/json',
+        }
+        data = {
+            'account_number': account_number,
+            'ifsc': ifsc_code,
+        }
+
+        response = requests.post(api_url, json=data, headers=headers)
+
+        if response.status_code == 200:
+            result = response.json()
+            if result.get('verified'):
+                return JsonResponse({'success': True, 'message': 'Bank account verified successfully!'})
+            else:
+                return JsonResponse({'success': False, 'message': 'Invalid account details.'})
+        else:
+            return JsonResponse({'success': False, 'message': 'API error occurred.'})
+        
+@login_required
+def apply_leave_view(request):
+    leaves = Leave.objects.filter(user=request.user).order_by('-created_at')
+    today = date.today().isoformat()
+
+    if request.method == 'POST':
+        form = LeaveForm(request.POST)
+        if form.is_valid():
+            leave = form.save(commit=False)
+            leave.user = request.user
+            leave.save()
+            return redirect('apply_leave')  
+    else:
+        form = LeaveForm()
+
+    return render(request, 'user/apply_leave.html', {'form': form, 'leaves':leaves, 'today':today, 'page_title':'Apply For a Leave'})
+
+@user_passes_test(is_admin)
+def approve_leave(request, leave_id):
+    leave = get_object_or_404(Leave, id=leave_id)
+    leave.status = 'approved'
+    leave.save()
+    messages.success(request, f"Leave for {leave.user.email} approved.")
+    return redirect('manage_leaves')
+
+@user_passes_test(is_admin)
+def reject_leave(request, leave_id):
+    leave = get_object_or_404(Leave, id=leave_id)
+    leave.status = 'rejected'
+    leave.save()
+    messages.warning(request, f"Leave for {leave.user.email} rejected.")
+    return redirect('manage_leaves')
+
+@user_passes_test(is_admin)
+def manage_leaves_view(request):
+    leaves = Leave.objects.all().order_by('-created_at')
+    return render(request, 'user/manage_leaves.html', {'leaves': leaves, 'page_title':'Manage Leaves'})
+
+# ========== Engineer Management Views ==========
+
+def engineer_view(request):
+    search_query = request.GET.get('search', '')
+
+    # Start with verified engineers only
+    engineers = CustomUser.objects.filter(is_verified_by_admin=True)
+
+    # Filter by email if search query is provided
+    if search_query:
+        engineers = engineers.filter(email__icontains=search_query)
+
+    # Annotate with vehicle count
+    engineers = engineers.annotate(vehicle_count=Count('inspected_vehicles'))
+
+    return render(request, 'user/staff.html', {
+        'engineers': engineers,
+        'search_query': search_query,
+        'page_title' : 'Engineer Management',
+    })
+
+from django.utils.timezone import localdate
+
 
 
 # ========== Role & Permission Views ==========

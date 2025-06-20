@@ -39,7 +39,11 @@ def vehicle_view(request):
 
     customer = get_object_or_404(Customer, id=customer_id)
     instance = Vehicle.objects.filter(customer_id=customer_id).first()
+    vehicle = None
+    print("Vehicle:", vehicle)
+    print("Instance:", instance)
 
+    
     if request.method == 'POST':
         request.POST = request.POST.copy()  
 
@@ -86,9 +90,10 @@ def vehicle_view(request):
             return redirect ('form_obdreading')
 
     else:
+        initial_date = instance.inspection_date if instance and instance.inspection_date else timezone.now().date()
         initial_data = {
             'customer': customer_id,
-            'inspection_date': timezone.now().date(),
+            'inspection_date': initial_date,
             'inspected_by': request.user.id,
         }
         form = VehicleForm(instance=instance, initial=initial_data)
@@ -98,7 +103,8 @@ def vehicle_view(request):
             'fuel_types': VehicleFuelType.objects.all(),
             'transmission_types': VehicleTransmission.objects.all(),
             'engine_types': VehicleEngineType.objects.all(),
-            'customer': customer
+            'customer': customer,
+            'vehcile':vehicle,
         })
 
 
