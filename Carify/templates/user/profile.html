@@ -1,0 +1,222 @@
+{% extends "user/base.html" %}
+{% load static %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block extra_css %}
+<style>
+  body {
+    font-family: Arial, sans-serif;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 40px auto;
+    background: #f8f2f2;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+
+  h2 {
+    text-align: center;
+    color: #333;
+  }
+
+  .step-indicator {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .step-indicator div {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #ccc;
+    color: #fff;
+    text-align: center;
+    line-height: 30px;
+    margin: 0 10px;
+  }
+
+  .step-indicator .active {
+    background-color: #007BFF;
+  }
+
+  .form-step {
+    display: none;
+  }
+
+  .form-step.active {
+    display: block;
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+  }
+
+  .form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #444;
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+  }
+
+  .form-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+
+  .form-navigation button {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  #prevBtn {
+    background-color: #aaa;
+    color: white;
+  }
+
+  #nextBtn {
+    background-color: #007BFF;
+    color: white;
+  }
+
+  #submitBtn {
+    background-color: #28a745;
+    color: white;
+  }
+</style>
+{% endblock %}
+
+{% block profile %}
+<div class="container">
+
+  <!-- Step Indicators -->
+  <div class="step-indicator">
+    <div id="step-indicator-1" class="active">1</div>
+    <div id="step-indicator-2">2</div>
+    <div id="step-indicator-3">3</div>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" id="profileForm">
+    {% csrf_token %}
+
+    <!-- Step 1: Personal Info -->
+    <div class="form-step active" id="step-1">
+      <h3>Step 1: Personal Information</h3>
+      <div class="form-group">{{ form.first_name.label_tag }}{{ form.first_name }}</div>
+      <div class="form-group">{{ form.last_name.label_tag }}{{ form.last_name }}</div>
+      <div class="form-group">{{ form.email.label_tag }}{{ form.email }}</div>
+      <div class="form-group">{{ form.phone.label_tag }}{{ form.phone }}</div>
+      <div class="form-group">{{ form.date_of_birth.label_tag }}{{ form.date_of_birth }}</div>
+      <div class="form-group">{{ form.gender.label_tag }}{{ form.gender }}</div>
+      <div class="form-group">{{ form.address.label_tag }}{{ form.address }}</div>
+      <div class="form-group">{{ form.profile_picture.label_tag }}{{ form.profile_picture }}</div>
+    </div>
+
+    <!-- Step 2: Documents -->
+    <div class="form-step" id="step-2">
+      <h3>Step 2: Document Verification</h3>
+      <div class="form-group">{{ form.govt_id_number.label_tag }}{{ form.govt_id_number }}</div>
+      <div class="form-group">{{ form.govt_id_document.label_tag }}{{ form.govt_id_document }}</div>
+      <div class="form-group">{{ form.pancard_number.label_tag }}{{ form.pancard_number }}</div>
+      <div class="form-group">{{ form.pancard_document.label_tag }}{{ form.pancard_document }}</div>
+
+    </div>
+
+    <!-- Step 3: Bank Info -->
+    <div class="form-step" id="step-3">
+      <h3>Step 3: Bank Details</h3>
+      <div class="form-group">{{ form.bank_account_number.label_tag }}{{ form.bank_account_number }}</div>
+      <div class="form-group">{{ form.ifsc_code.label_tag }}{{ form.ifsc_code }}</div>
+      <div class="form-group">{{ form.bank_name.label_tag }}{{ form.bank_name }}</div>
+      <button type="button" class="btn btn-outline-success mt-2" id="verifyBankBtn">
+         Verify Bank Details
+      </button>
+
+    </div>
+
+    <!-- Navigation -->
+    <div class="form-navigation">
+      <button type="button" id="prevBtn">⬅ Previous</button>
+      <button type="button" id="nextBtn">Next ➡</button>
+      <button type="submit" class="d-none" id="submitBtn">✅ Submit</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    let currentStep = 1;
+    const totalSteps = 3;
+
+    function updateFormStep() {
+      for (let i = 1; i <= totalSteps; i++) {
+        document.getElementById(`step-${i}`).classList.remove('active');
+        document.getElementById(`step-indicator-${i}`).classList.remove('active');
+      }
+      document.getElementById(`step-${currentStep}`).classList.add('active');
+      document.getElementById(`step-indicator-${currentStep}`).classList.add('active');
+
+      document.getElementById('prevBtn').style.display = currentStep === 1 ? 'none' : 'inline-block';
+      document.getElementById('nextBtn').style.display = currentStep === totalSteps ? 'none' : 'inline-block';
+      document.getElementById('submitBtn').classList.toggle('d-none', currentStep !== totalSteps);
+    }
+
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      if (currentStep < totalSteps) {
+        currentStep++;
+        updateFormStep();
+      }
+    });
+
+    document.getElementById('prevBtn').addEventListener('click', () => {
+      if (currentStep > 1) {
+        currentStep--;
+        updateFormStep();
+      }
+    });
+
+    updateFormStep();
+  });
+
+
+  document.getElementById("verifyBankBtn").addEventListener("click", function () {
+    const account = document.getElementById("id_bank_account_number").value;
+    const ifsc = document.getElementById("id_ifsc_code").value;
+
+    fetch("{% url 'verify_bank' %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({
+            account_number: account,
+            ifsc_code: ifsc
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message);
+    });
+});
+</script>
+{% endblock %}

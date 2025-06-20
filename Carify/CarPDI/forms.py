@@ -19,7 +19,7 @@ class VehicleForm(forms.ModelForm):
         model = Vehicle
         fields = [ 'image', 'model',  'vin', 'fuel_type',
             'transmission', 'engine_cc', 'engine_type', 'bhp', 'airbags',
-            'mileage_kmpl', 'ncap_rating', 'num_keys', 'inspection_date',
+            'mileage_kmpl', 'ncap_rating', 'num_keys', 
             'inspected_by', 'health_score']
 
 class OBDReadingForm(forms.ModelForm):
@@ -65,7 +65,7 @@ class PaintFinishForm(forms.ModelForm):
 class TyreConditionForm(forms.ModelForm):
     class Meta:
         model = TyreCondition
-        fields = [ 'position', 'brand', 'condition', 'manufacturing_date', 'remaining_life_percent']
+        fields = [ 'position', 'brand', 'condition', 'remaining_life_percent']
 
 class FlushGapForm(forms.ModelForm):
     class Meta:
