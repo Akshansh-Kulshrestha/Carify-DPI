@@ -211,17 +211,13 @@
                              ('Duplicate Keys', 'Duplicate Keys'),
                              ]
 
-
+# Voltage Inference
 import pandas as pd
-from CarPDI.models import VoltageInference  # Replace `your_app` with the actual app name
-
-# Load the CSV file
+from CarPDI.models import VoltageInference  
 df = pd.read_csv(
     'C:/Users/Akshansh/OneDrive/Desktop/Sudo Technolab/Carify/Carify/voltage_interence.csv',
     encoding='ISO-8859-1'
 )
-
-# Create and bulk insert instances
 records = [
     VoltageInference(
         voltage=row['Voltage (V)'],
@@ -231,20 +227,14 @@ records = [
     )
     for _, row in df.iterrows()
 ]
-
 VoltageInference.objects.bulk_create(records)
 
-#System Model
-
+# System Model
 import pandas as pd
 from CarPDI.models import System
-# Load the CSV
 df = pd.read_csv('C:/Users/Akshansh/OneDrive/Desktop/Sudo Technolab/Carify/Carify/system_check.csv')
-# Remove duplicates and NaNs if any
 df = df.dropna(subset=['name'])
 df = df.drop_duplicates(subset=['name'])
-# Prepare records
 records = [System(name=row['name']) for _, row in df.iterrows()]
-# Bulk insert
 System.objects.bulk_create(records, ignore_conflicts=True)  # Avoid duplicate entry errors
 print(f"{len(records)} systems inserted successfully.")
