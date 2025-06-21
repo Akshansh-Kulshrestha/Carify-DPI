@@ -2,5 +2,9 @@ db.sqlite3
 .venv
 media
 
+<<<<<<< Updated upstream
 __pycache__
+=======
+__pycache__/
+>>>>>>> Stashed changes
 *.pyc
