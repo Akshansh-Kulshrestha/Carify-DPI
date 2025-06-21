@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from .models import CustomUser, Roles, Permissions, UserRole
+from .models import CustomUser, Roles, Permissions, UserRole, Leave
 from django.contrib.auth.forms import PasswordResetForm
 
 # Reset Password
@@ -53,3 +53,27 @@ class RolePermissionForm(forms.Form):
         widget=forms.CheckboxSelectMultiple,
         label="Assign Permissions"
     )
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = [
+            'first_name', 'last_name', 'email', 'phone', 'date_of_birth', 'gender', 'address',
+            'profile_picture',
+            'govt_id_number', 'govt_id_document',
+            'pancard_number', 'pancard_document',
+            'bank_account_number', 'ifsc_code', 'bank_name',
+        ]
+        widgets = {
+            'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+class LeaveForm(forms.ModelForm):
+    class Meta:
+        model = Leave
+        fields = ['start_date', 'end_date', 'reason']
+        widgets = {
+            'start_date': forms.DateInput(attrs={'type': 'date'}),
+            'end_date': forms.DateInput(attrs={'type': 'date'}),
+            'reason': forms.Textarea(attrs={'rows': 3}),
+        }

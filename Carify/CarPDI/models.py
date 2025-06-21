@@ -45,9 +45,11 @@ class Vehicle(models.Model):
     mileage_kmpl = models.FloatField()
     ncap_rating = models.CharField(max_length=20, null=True, blank=True)
     num_keys = models.IntegerField()
-    inspection_date = models.DateField()
+    inspection_date = models.DateField(auto_now_add=True)
     inspected_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='inspected_vehicles')
     health_score = models.FloatField()
+    is_completed = models.BooleanField(default=False) 
+
 
     def __str__(self):
         return f"{self.model} - {self.model} - {self.vin}"
@@ -106,13 +108,14 @@ class FluidLevel(models.Model):
     recommendation = models.CharField(max_length=100)
 
 class VoltageInference(models.Model):
-    voltage = models.CharField (max_length=20)
+
+    voltage = models.CharField(max_length=20)
     engine_state = models.CharField(max_length=20)
     interence = models.CharField(max_length=70)
     recommendation = models.CharField(max_length=100)
 
     def __str__(self):
-        return f"{self.voltage} {self.engine_state} {self.interence} {self.recommendation}"
+        return f"{self.voltage}, {self.engine_state}, {self.interence}, {self.recommendation}"
 
 class Parameters(models.Model):
     name = models.CharField(max_length=100)
@@ -145,13 +148,10 @@ class PaintArea(models.Model):
 
 class PaintFinish(models.Model):
 
-    STATUS_CHOICES = [('all ok','All Ok'),
-                             ('not ok','Not Ok'),
-                             ('NA', 'NA'),
-                             ]
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
     area = models.ForeignKey(PaintArea, on_delete=models.CASCADE)
-    repainted = models.BooleanField()
+    repainted = models.BooleanField(default=False)
+
     condition = models.ForeignKey(Status, on_delete=models.CASCADE)
     action = models.CharField(max_length=100)
 
@@ -166,7 +166,6 @@ class TyreCondition(models.Model):
     position = models.ForeignKey(TyrePosition, on_delete=models.CASCADE)
     brand = models.CharField(max_length=50)
     condition = models.ForeignKey(Status, on_delete=models.CASCADE)
-    manufacturing_date = models.DateField()
     remaining_life_percent = models.FloatField()
 
 class FlushArea(models.Model):
@@ -184,7 +183,7 @@ class FlushGap(models.Model):
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
     area = models.ForeignKey(FlushArea, on_delete=models.CASCADE)
     operation = models.ForeignKey(Operations, on_delete=models.CASCADE)
-    observation_gap = models.BooleanField()
+    observation_gap = models.CharField(max_length=20)
     action = models.CharField(max_length=100)
 
 class RubberArea(models.Model):

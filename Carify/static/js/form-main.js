@@ -1,113 +1,32 @@
+
+
+//vehicle form code
 document.addEventListener("DOMContentLoaded", function () {
-  // Show the modal
-  const showAddFuelModal = () => {
-    const modal = document.getElementById('fuelModal');
-    if (modal) modal.style.display = 'block';
-  };
+  const dropdowns = [
+    { select: "fuelDropdown", input: "customFuelInput" },
+    { select: "transmissionDropdown", input: "customTransmissionInput" },
+    { select: "engineDropdown", input: "customEngineInput" }
+  ];
 
-  // Hide the modal
-  const hideAddFuelModal = () => {
-    const modal = document.getElementById('fuelModal');
-    if (modal) modal.style.display = 'none';
-  };
+  dropdowns.forEach(({ select, input }) => {
+    const selectElem = document.getElementById(select);
+    const inputElem = document.getElementById(input);
 
-  // Submit the new fuel type via AJAX
-  const submitNewFuel = () => {
-    const nameInput = document.getElementById("newFuelName");
-    const name = nameInput.value.trim();
-    const submitBtn = document.getElementById("fuelSubmitBtn");
+    if (selectElem && inputElem) {
+      selectElem.addEventListener("change", () => {
+        inputElem.style.display = selectElem.value === "__custom__" ? "block" : "none";
+        if (selectElem.value !== "__custom__") inputElem.value = "";
+      });
 
-    if (!name) {
-      alert("Please enter a fuel type name.");
-      return;
+      // Trigger once on load in case already selected
+      if (selectElem.value === "__custom__") {
+        inputElem.style.display = "block";
+      }
     }
-
-    submitBtn.disabled = true;
-
-    fetch("/add-fuel-type/", {  // Use static URL or replace with Django rendered URL via data-attribute
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
-      },
-      body: `name=${encodeURIComponent(name)}`
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error("Network response was not OK");
-      }
-      return response.json();
-    })
-    .then(data => {
-      if (data.status === "success") {
-        const select = document.getElementById("id_fuel_type");
-        if (select) {
-          const option = new Option(data.name, data.id, true, true);
-          select.add(option);
-          select.value = data.id;
-        }
-
-        nameInput.value = ""; // Clear input
-        hideAddFuelModal();   // Close modal
-      } else {
-        alert("Error: " + data.message);
-      }
-    })
-    .catch(error => {
-      console.error("Error adding fuel type:", error);
-      alert("Something went wrong. Please try again.");
-    })
-    .finally(() => {
-      submitBtn.disabled = false;
-    });
-  };
-
-  // Attach event listeners
-  const showBtn = document.getElementById("fuelShowBtn");
-  const hideBtn = document.getElementById("fuelHideBtn");
-  const submitBtn = document.getElementById("fuelSubmitBtn");
-
-  if (showBtn) showBtn.addEventListener("click", showAddFuelModal);
-  if (hideBtn) hideBtn.addEventListener("click", hideAddFuelModal);
-  if (submitBtn) submitBtn.addEventListener("click", submitNewFuel);
+  });
 });
 
-
-  
-  function showAddTransmissionModal() {
-    document.getElementById('transmissionModal').style.display = 'block';
-  }
-
-  function hideAddTransmissionModal() {
-    document.getElementById('transmissionModal').style.display = 'none';
-  }
-
-  function submitNewTransmission() {
-    const name = document.getElementById("newTransmissionName").value;
-    if (!name.trim()) return alert("Please enter a transmission name.");
-
-    fetch("{% url 'add_transmission_ajax' %}", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "X-CSRFToken": "{{ csrf_token }}"
-      },
-      body: `name=${encodeURIComponent(name)}`
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.status === "success") {
-        const select = document.getElementById("id_transmission");
-        const option = new Option(data.name, data.id, true, true);
-        select.add(option);
-        hideAddTransmissionModal();
-      } else {
-        alert("Error: " + data.message);
-      }
-    });
-  }
-
-
+// pramod sir code
 const carImageInput = document.getElementById('carImageInput');
     const galleryPreview = document.getElementById('galleryPreview');
 

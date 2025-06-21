@@ -5,11 +5,7 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Dashboard</title>
-
-  <link rel="icon" href="{% static 'images/favicon.png' %}" type="image/x-icon" />
-  <link rel="shortcut icon" href="{% static 'images/favicon.png' %}" type="image/x-icon" />
-
+  <title>Carify</title>
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet" />
@@ -30,7 +26,7 @@
   <!-- JS Scripts in Head -->
   <script src="https://kit.fontawesome.com/99a870abbd.js" crossorigin="anonymous"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
+  {% block extra_css %}{% endblock %}
 
 
 </head>
@@ -54,15 +50,28 @@
                 <h2 class="m-0 text-white text-center flex-grow-1">  {{ page_title|default:"Dashboard" }} </h2>
                 
                 <!-- Profile dropdown start -->
-                <div class="dropdown ms-3">
-                  <a class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <span>{{ request.user.first_name }}</span>
-                  </a>
-                  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+              <div class="dropdown ms-3">
+                <a class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  
+                  <!-- Profile Image -->
+                  <img src="{% if request.user.profile_picture %}{{ request.user.profile_picture.url }}{% else %}{% static 'images/default-image.jpg' %}{% endif %}"
+                      alt="Profile Picture"
+                      class="rounded-circle me-2"
+                      width="32" height="32"
+                      style="object-fit: cover; border: 2px solid white;">
 
-                    <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
-                  </ul>
-                </div>
+                  <span>{{ request.user.first_name }}</span>
+                </a>
+
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                  <li><a class="dropdown-item" href="{% url 'profile' %}">My Profile</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="{% url 'apply_leave' %}">Apply Leave</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+                </ul>
+              </div>
+
                 <!-- Profile dropdown end -->
 
               </div>
@@ -86,7 +95,6 @@
 
           <ul class="sidebar-menu pt-3" id="simple-bar">
             {% if request.user.is_authenticated %}
-            {% if request.user.is_verified_by_admin %}
 
           <li class="sidebar-list {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
             <a class="sidebar-link d-flex align-items-center" href="{% url 'admin_dashboard' %}">
@@ -95,25 +103,33 @@
             </a>
           </li>
             {% endif %}
-            {% endif %}
             {% if request.user.is_authenticated %}
-            {% if request.user.is_admin %}
-            <li class="sidebar-list dropdown {% if request.resolver_match.url_name in 'user_dashboard manage_roles_permissions' %}open active{% endif %}">
+            <li class="sidebar-list dropdown {% if request.resolver_match.url_name in 'user_dashboard roles_dashboard' %}open active{% endif %}">
               <a href="#" class="sidebar-link d-flex align-items-center toggle-dropdown">
                 <i class="fa-solid fa-users fa-lg" style="color: #F04C5C; padding-left:15px;"></i>
                 <span class="label-text">User Management</span>
               </a>
               <ul class="sidebar-submenu">
-                <li><a href="{%url 'user_dashboard'%}" class="sidebar-link d-flex align-items-center {% if request.resolver_match.url_name == 'user_dashboard' %}active{% endif %}"><i class="fa-solid fa-user"></i> <span>User</span></a></li>
+                <li><a href="{%url 'user_dashboard'%}" class="sidebar-link d-flex align-items-center {% if request.resolver_match.url_name == 'user_dashboard' %}active{% endif %}"><i class="fa-solid fa-user"></i> <span>Staff</span></a></li>
                 {% if request.user.is_superuser %}
-                <li><a href="{%url 'roles_dashboard'%}" class="sidebar-link d-flex align-items-center {% if request.resolver_match.url_name == 'manage_roles_permissions' %}active{% endif %}"><i class="fa-solid fa-user-tie"></i> <span>Roles</span></a></li>
+                <li><a href="{%url 'roles_dashboard'%}" class="sidebar-link d-flex align-items-center {% if request.resolver_match.url_name == 'roles_dashboard' %}active{% endif %}"><i class="fa-solid fa-user-tie"></i> <span>Roles</span></a></li>
                 {% endif %}
               </ul>
             </li>
             {% endif %}
+             {% if request.user.is_authenticated %}
+            <li class="sidebar-list dropdown {% if request.resolver_match.url_name in 'engineer manage_leaves login_hours' %}open active{% endif %}">
+              <a href="#" class="sidebar-link d-flex align-items-center toggle-dropdown">
+                <i class="fa-solid fa-users fa-lg" style="color: #F04C5C; padding-left:15px;"></i>
+                <span class="label-text">HRM</span>
+              </a>
+              <ul class="sidebar-submenu">
+                <li><a href="{%url 'engineer'%}" class="sidebar-link d-flex align-items-center {% if request.resolver_match.url_name == 'engineer' %}active{% endif %}"><i class="fa-solid fa-helmet-safety fa-xs"></i> <span>Engineer</span></a></li>
+                <li><a href="{%url 'manage_leaves'%}" class="sidebar-link d-flex align-items-center {% if request.resolver_match.url_name == 'manage_leaves' %}active{% endif %}"><i class="fa-solid fa-calendar-xmark"></i> <span>Leaves</span></a></li>
+              </ul>
+            </li>
             {% endif %}
             {% if request.user.is_authenticated %}
-            {% if request.user.is_verified_by_admin %}
             <li class="sidebar-list dropdown {% if request.resolver_match.url_name in 'vehicles_inspected vehicles_inspected_by_user' %}open active{% endif %}">
               <a href="#" class="sidebar-link d-flex align-items-center toggle-dropdown">
                 <i class="fa-solid fa-car fa-lg" style="color: #F04C5C; padding-left:15px;"></i>
@@ -121,16 +137,17 @@
               </a>
               <ul class="sidebar-submenu">
                 <li><a href="{% url 'vehicles_inspected' %}" class="sidebar-link d-flex align-items-center {% if request.resolver_match.url_name == 'vehicles_inspected' %}active{% endif %}"><i class="fa-solid fa-car-side"></i> <span>All Vehciles</span></a></li>
+                {% if request.user.is_verified_by_admin %}
                 <li><a href="{%url 'vehicles_inspected_by_user' user.id %}" class="sidebar-link d-flex align-items-center {% if request.resolver_match.url_name == 'vehicles_inspected_by_user' %}active{% endif %}"><i class="fa-solid fa-user-gear"></i> <span>My Vehciles</span></a></li>
+                {% endif %}
               </ul>
             </li>
-            {% endif %}
             {% endif %}
             {% if request.user.is_authenticated %}
             {% if request.user.is_verified_by_admin %}
 
-          <li class="sidebar-list {% if request.resolver_match.url_name == 'unified_form' %}active{% endif %}">
-            <a class="sidebar-link d-flex align-items-center" href="{% url 'unified_form' %}">
+          <li class="sidebar-list {% if request.resolver_match.url_name == 'form_customer' %}active{% endif %}">
+            <a class="sidebar-link d-flex align-items-center" href="{% url 'form_customer' %}">
               <i class="fa-solid fa-pencil fa-lg" style="color: #F04C5C; padding-left:15px;"></i>
               <span class="label-text">Fill PDI Form</span>
             </a>
@@ -164,6 +181,13 @@
 {% block roles_dashboard %}{% endblock %}
 {% block assign_roles %}{%endblock%}
 {% block form %}{% endblock form %}
+{% block engineer %}{% endblock engineer %}          
+  {% block leave %}{% endblock %}
+  {% block extra_js %}{% endblock %}
+  {% block profile %}{% endblock profile %}
+  {% block leave_form %}{% endblock leave_form %}
+  {% block manage_leaves %}{% endblock manage_leaves %}
+  {% block login_hours %}{% endblock login_hours %}
 
   </div>
 

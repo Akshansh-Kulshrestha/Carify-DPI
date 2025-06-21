@@ -116,6 +116,7 @@ body {
   width: 100%;
 }
 
+
 /* Sidebar link hover effect */
 .sidebar-link:hover {
   background-color: #f0f0f0;
@@ -280,3 +281,5 @@ body {
   border-left: 4px solid #F04C5C;
   color: #F04C5C !important;
 }
+
+
