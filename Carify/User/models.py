@@ -9,7 +9,7 @@ from django.conf import settings
 
 class CustomUser(AbstractUser):
     username=None
-    emp_id = models.CharField(max_length=20, blank=True, null=True)
+    emp_id = models.CharField(max_length=20, blank=True, null=True, unique=True)
     email=models.EmailField(_("email address"), unique=True)
     is_verified_by_admin = models.BooleanField(default=False)
 
@@ -50,11 +50,22 @@ class CustomUser(AbstractUser):
         return self.is_staff
     
     def save(self, *args, **kwargs):
-        if not self.emp_id:
-            last = CustomUser.objects.order_by('id').last()
-            next_id = last.emp_id + 1 if last else 1
+        if not self.pk and not self.emp_id:
+            # Only generate emp_id for new user creation
+            last_user = CustomUser.objects.exclude(emp_id__isnull=True).order_by('-id').first()
+            if last_user and last_user.emp_id:
+                try:
+                    last_id_num = int(last_user.emp_id.replace("#CRFY", ""))
+                except ValueError:
+                    last_id_num = 0
+                next_id = last_id_num + 1
+            else:
+                next_id = 1
             self.emp_id = f"#CRFY{str(next_id).zfill(6)}"
+        
         super().save(*args, **kwargs)
+
+
     
     @property
     def status(self):

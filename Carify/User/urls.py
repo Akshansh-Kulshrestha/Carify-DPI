@@ -15,11 +15,14 @@ urlpatterns = [
     path('staff/<int:user_id>/calendar/', views.leave_calendar_view, name='leave_calendar'),
     path('staff/<int:user_id>/calendar/events/', views.leave_events_json, name='leave_events_json'),
     path('profile/', views.profile_view, name='profile'),
+    path('profile/<int:user_id>/', views.view_profile, name='view_profile'),
     path('verify-bank/', views.verify_bank_details, name='verify_bank'),
     path('apply-leave/', views.apply_leave_view, name='apply_leave'),
     path('leave/approve/<int:leave_id>/', views.approve_leave, name='approve_leave'),
     path('leave/reject/<int:leave_id>/', views.reject_leave, name='reject_leave'),
     path('admin/leaves/', views.manage_leaves_view, name='manage_leaves'),
+    path('login-log/<int:user_id>', views.login_logout_report, name='login_logout_report'),
+
 
     path('vehicles/inspected/user/<int:user_id>/', views.vehicles_inspected_by_single_user, name='vehicles_inspected_by_user'),
     path('vehicles/inspected/', views.vehicles_inspected, name='vehicles_inspected'),

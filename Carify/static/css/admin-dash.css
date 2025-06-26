@@ -9,7 +9,9 @@ body {
   font-family: 'Nunito Sans', sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #f8f2f2;
+  background-color: whitesmoke;
+  overflow-x: hidden;
+  
 }
 
 /* ========================
@@ -17,8 +19,11 @@ body {
 ========================= */
 
 .landing-header {
-  position: relative;
+  position: fixed;
   z-index: 10;
+  width: 100%;
+  margin-top: -2vh;
+  /* box-shadow: 0 0 0 1px whitesmoke; */
 }
 
 .landing-header .skewed-bg {
@@ -27,16 +32,18 @@ body {
   left: 0;
   height: 100%;
   width: 100%;
-  background-color: #F04C5C;
+  /* background-color: #004777; */
   transform: skewX(-20deg);
   transform-origin: bottom left;
-  z-index: 0;
+  z-index: -1;
+    
 }
 
 .landing-header .header-content {
   position: relative;
   z-index: 1;
   padding: 1rem 2rem;
+ 
 }
 
 .header-flex {
@@ -68,17 +75,18 @@ body {
 
 .page-sidebar {
   width: 250px;
-  background-color: #fff;
-  border-right: 1px solid #ddd;
+  background-color: whitesmoke;
+  border-right: 1px solid whitesmoke;
   padding: 20px 0;
   height: 100vh;
   position: sticky;
-  top: 0;
+  top: 10vh;
 }
 
 .page-body-wrapper {
   flex-grow: 1;
   padding: 20px;
+  background-color: white;
 }
 
 /* ========================
@@ -111,11 +119,10 @@ body {
   display: flex;
   align-items: center;
   text-decoration: none;
-  color: #333;
+  color: #052d47;
   padding: 10px 20px;
   width: 100%;
 }
-
 
 /* Sidebar link hover effect */
 .sidebar-link:hover {
@@ -127,7 +134,7 @@ body {
 .sidebar-link i {
   margin-right: 10px;
   font-size: 20px;
-  color: #F04C5C;
+  color: #052d47;
 }
 
 /* ========================
@@ -136,29 +143,6 @@ body {
 
 .summary-card h6 {
   font-size: 14px;
-}
-
-/* ========================
-   Responsive Styles
-========================= */
-
-@media (max-width: 576px) {
-  .header-center-title {
-    font-size: 1.2rem;
-  }
-
-  .navbar-brand img {
-    max-width: 100px;
-  }
-
-  .page-sidebar {
-    display: none; /* Hide sidebar on small screens */
-  }
-
-  .btn {
-    font-size: 12px !important;
-    padding: 5px 10px !important;
-  }
 }
 
 /* ========================
@@ -213,7 +197,7 @@ body {
 }
 
 .label-text:hover {
-  color: #F04C5C;
+  color: #052d47;
   padding: 2px;
 }
 
@@ -253,7 +237,7 @@ body {
 
 /* Submenu hover effect */
 .sidebar-submenu li a:hover {
-  color: #F04C5C;
+  color: #004777;
 }
 
 /* When sidebar-list is open, display its submenu */
@@ -279,7 +263,69 @@ body {
   background-color: #f4dcdc;
   font-weight: 600;
   border-left: 4px solid #F04C5C;
-  color: #F04C5C !important;
+  color: #052d47 !important;
 }
 
+
+/* ========== Responsive Sidebar for Mobile/Tablet ========== */
+
+@media (max-width: 425px){
+  #logo{
+    display: none;
+    align-items: left;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .page-wrapper {
+    flex-direction: column;
+  }
+ 
+
+  .page-sidebar {
+    position: absolute;
+    top: 60px; /* below header */
+    left: 0;
+    width: 100%;
+    background-color: whitesmoke;
+    display: none;
+    flex-direction: column;
+    z-index: 999;
+    border-bottom: 1px solid #ccc;
+    animation: dropdown 0.3s ease-in-out forwards;
+  }
+
+  .page-sidebar.active {
+    display: flex;
+  }
+
+  @keyframes dropdown {
+    0% {
+      opacity: 0;
+      transform: translateY(-15px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  #mobileToggleBtn {
+    display: flex;
+    justify-content: flex-end;
+    background: transparent;
+    border: none;
+    font-size: 22px;
+    padding: 10px 20px;
+    color: #052d47;
+    cursor: pointer;
+    z-index: 1001;
+  }
+
+  /* Hide full sidebar toggle button */
+  #toggleSidebar {
+    display: none !important;
+  }
+}
 

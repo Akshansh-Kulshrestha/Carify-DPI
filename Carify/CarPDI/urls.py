@@ -2,6 +2,14 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path('payment/<int:vehicle_id>/', views.create_payment, name='create_payment'),
+    path('payment/verify/', views.payment_verify, name='payment_verify'),
+    path('payment/success/<int:vehicle_id>/', views.payment_success, name='payment_success'),
+    path('payment/failed/<int:vehicle_id>/', views.payment_failed, name='payment_failed'),
+    path('send-payment/<int:vehicle_id>/', views.send_payment_link, name='send_payment_link'),
+    path('payment/callback/', views.razorpay_callback, name='razorpay_callback'),
+
+
     path('customer/', views.customer_view, name='form_customer'),
     path('vehicle/', views.vehicle_view, name='form_vehicle'),
     path('obdreading/', views.obdreading_view, name='form_obdreading'),
