@@ -10,7 +10,7 @@
 
 
           <!-- Manage User Section -->
-          <div class="card job-card mt-4">
+          <div class="card job-card mt-5">
             <div class="card-header d-flex justify-content-between align-items-center">
               <h4 class="mb-0">Manage Staff</h4>
               <a href="{% url 'register' %}" class="btn btn-sm btn-warning">User Registration</a>
@@ -41,7 +41,11 @@
                     <tr>
                       <td>{{ user.emp_id }}</td>
                       <td>{{ user.first_name }} {{user.last_name}}</td>
-                      <td>{{ user.total_login_duration_str }}</td>
+                      <td>
+                        <span class="login-duration" data-start="{{ user.live_session_start|date:"Y-m-d H:i:s" }}">
+                          {{ user.today_login_duration_str }}
+                        </span>
+                      </td>
                       <td>{{ user.vehicle_count }}</td>
                       <td>{{ user.is_verified_by_admin }}</td>
                       <td class="text-center">
@@ -49,16 +53,15 @@
                             {% if user.is_verified_by_admin %}
                               <!-- Show Unverify button if already verified -->
                               <a href="{% url 'unverify_user' user.id %}" class="btn btn-sm btn-warning"
-                                onclick="return confirm('Unverify this user?');" title="Unverify User">
+                                onclick="return confirm('Unverify this user?');" title="Unverify Engineer">
                                   <i class="bi bi-person-slash"></i>     
                                 </a>
                             {% else %}
                               <!-- Show Verify button if not verified -->
-                              <a href="{% url 'verify_user' user.id %}"  class="btn btn-success btn-sm" title="Verify User">
+                              <a href="{% url 'view_profile' user.id %}"  class="btn btn-success btn-sm" title="Verify Engineer">
                                 <i class="fa-solid fa-circle-check"></i>
                               </a>
                             {% endif %}
-
                           <a href="{%url 'vehicles_inspected_by_user' user.id%}" class="btn btn-primary btn-sm" title="Vehicle Inspected">
                             <i class="bx bx-car"></i>
                           </a>
@@ -69,8 +72,9 @@
                           <a href="{% url 'leave_calendar' user.id %}" class="btn btn-secondary btn-sm"title="View Calendar">
                             <i class="fa-regular fa-calendar-days"></i>
                           </a>
-
-
+                          <a href="{% url 'login_logout_report' user.id %}" class="btn btn-light btn-sm"title="View Session Report">
+                            <i class="fa-solid fa-right-to-bracket"></i>
+                          </a>
                         </div>
                       </td>
                     </tr>
@@ -88,6 +92,33 @@
         </div>
       </div>
     </main>
-  
+  <script>
+function pad(n) {
+  return n < 10 ? '0' + n : n;
+}
+
+function updateDurations() {
+  const now = new Date();
+
+  document.querySelectorAll('.login-duration').forEach(span => {
+    const startAttr = span.getAttribute('data-start');
+    if (!startAttr) return;
+
+    const startTime = new Date(startAttr);
+    const diff = Math.floor((now - startTime) / 1000);  // in seconds
+
+    const hrs = Math.floor(diff / 3600);
+    const mins = Math.floor((diff % 3600) / 60);
+    const secs = diff % 60;
+
+    span.innerText = `${pad(hrs)}h ${pad(mins)}m ${pad(secs)}s`;
+  });
+}
+
+// Start the timer
+updateDurations();
+setInterval(updateDurations, 1000);
+</script>
+
 
 {% endblock user %}

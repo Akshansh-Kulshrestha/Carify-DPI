@@ -1,222 +1,131 @@
 {% extends "user/base.html" %}
 {% load static %}
-
-{% block title %}My Profile{% endblock %}
-
-{% block extra_css %}
-<style>
-  body {
-    font-family: Arial, sans-serif;
-  }
-
-  .container {
-    max-width: 800px;
-    margin: 40px auto;
-    background: #f8f2f2;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  }
-
-  h2 {
-    text-align: center;
-    color: #333;
-  }
-
-  .step-indicator {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
-  }
-
-  .step-indicator div {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: #ccc;
-    color: #fff;
-    text-align: center;
-    line-height: 30px;
-    margin: 0 10px;
-  }
-
-  .step-indicator .active {
-    background-color: #007BFF;
-  }
-
-  .form-step {
-    display: none;
-  }
-
-  .form-step.active {
-    display: block;
-  }
-
-  .form-group {
-    margin-bottom: 15px;
-  }
-
-  .form-group label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: #444;
-  }
-
-  .form-group input,
-  .form-group textarea,
-  .form-group select {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #aaa;
-    border-radius: 4px;
-  }
-
-  .form-navigation {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-  }
-
-  .form-navigation button {
-    padding: 8px 18px;
-    border: none;
-    border-radius: 4px;
-    font-weight: bold;
-    cursor: pointer;
-  }
-
-  #prevBtn {
-    background-color: #aaa;
-    color: white;
-  }
-
-  #nextBtn {
-    background-color: #007BFF;
-    color: white;
-  }
-
-  #submitBtn {
-    background-color: #28a745;
-    color: white;
-  }
-</style>
-{% endblock %}
-
 {% block profile %}
-<div class="container">
+<main class="page-body-wrapper">
+  <div class="page-body">
+    <div class="container-fluid">
+          <div class="card job-card mt-5">
+            <div class="card-header justify-content-between align-items-center">
+            <!-- Step Indicators -->
+        <div class="step-indicator">
+          <div id="step-indicator-1" class="active">1</div>
+          <div id="step-indicator-2">2</div>
+          <div id="step-indicator-3">3</div>
+        </div>
 
-  <!-- Step Indicators -->
-  <div class="step-indicator">
-    <div id="step-indicator-1" class="active">1</div>
-    <div id="step-indicator-2">2</div>
-    <div id="step-indicator-3">3</div>
+        <form method="post" enctype="multipart/form-data" id="profileForm">
+          {% csrf_token %}
+
+          <!-- Step 1: Personal Info -->
+          <div class="form-step active" id="step-1">
+            <h3>Step 1: Personal Information</h3>
+            <div class="row">
+              <div class="col-md-4 text-center">
+  <!-- Profile image preview -->
+  <div class="mb-3">
+    <div class="profile-pic-wrapper">
+      <img src="{% if user.profile_picture %}{{ user.profile_picture.url }}{% else %}{% static 'images/default-image.jpg' %}{% endif %}" 
+           id="profilePreview" 
+           alt="Profile Picture" 
+           class="profile-pic">
+    </div>
   </div>
 
-  <form method="post" enctype="multipart/form-data" id="profileForm">
-    {% csrf_token %}
+  <!-- Upload button -->
+<div class="mb-3 text-center">
+  <!-- Upload button label -->
+  <label for="id_profile_picture" class="btn btn-primary">
+    <i class="fa fa-upload"></i> Upload New Photo
+  </label>
 
-    <!-- Step 1: Personal Info -->
-    <div class="form-step active" id="step-1">
-      <h3>Step 1: Personal Information</h3>
-      <div class="form-group">{{ form.first_name.label_tag }}{{ form.first_name }}</div>
-      <div class="form-group">{{ form.last_name.label_tag }}{{ form.last_name }}</div>
-      <div class="form-group">{{ form.email.label_tag }}{{ form.email }}</div>
-      <div class="form-group">{{ form.phone.label_tag }}{{ form.phone }}</div>
-      <div class="form-group">{{ form.date_of_birth.label_tag }}{{ form.date_of_birth }}</div>
-      <div class="form-group">{{ form.gender.label_tag }}{{ form.gender }}</div>
-      <div class="form-group">{{ form.address.label_tag }}{{ form.address }}</div>
-      <div class="form-group">{{ form.profile_picture.label_tag }}{{ form.profile_picture }}</div>
+  <!-- Hidden input field (linked via 'for' above) -->
+  <input type="file" name="profile_picture" id="id_profile_picture" class="d-none" onchange="previewProfilePicture(this)">
+</div></div>
+
+
+              <div class="col-md-8">
+                <div class="form-group">{{ form.first_name.label_tag }}{{ form.first_name }}</div>
+                <div class="form-group">{{ form.last_name.label_tag }}{{ form.last_name }}</div>
+                <div class="form-group">{{ form.email.label_tag }}{{ form.email }}</div>
+                <div class="form-group">{{ form.phone.label_tag }}{{ form.phone }}</div>
+                <div class="form-group">{{ form.date_of_birth.label_tag }}{{ form.date_of_birth }}</div>
+                <div class="form-group">{{ form.gender.label_tag }}{{ form.gender }}</div>
+                <div class="form-group">{{ form.address.label_tag }}{{ form.address }}</div>
+              </div>
+            </div>
+          </div>
+
+<!-- Step 2: Documents -->
+<div class="form-step" id="step-2">
+  <h3>Step 2: Document Verification</h3>
+
+  <!-- Govt ID Number -->
+  
+  <div class="row">
+    <!-- Govt ID Upload -->
+    <div class="col-md-6">
+      <div class="form-group">
+        <div class="form-group">
+          {{ form.govt_id_number.label_tag }}
+          {{ form.govt_id_number }}
+        </div>
+        <label for="id_govt_id_document">Govt ID Document</label>
+        {% if form.instance.govt_id_document %}
+          <div class="text-end mb-2">
+            <a href="{{ form.instance.govt_id_document.url }}" target="_blank" class="btn btn-sm btn-outline-secondary" style="float: left;">View Uploaded</a>
+          </div>
+        {% else %}
+          <input type="file" name="govt_id_document" id="id_govt_id_document" class="form-control">
+        {% endif %}
+      </div>
     </div>
 
-    <!-- Step 2: Documents -->
-    <div class="form-step" id="step-2">
-      <h3>Step 2: Document Verification</h3>
-      <div class="form-group">{{ form.govt_id_number.label_tag }}{{ form.govt_id_number }}</div>
-      <div class="form-group">{{ form.govt_id_document.label_tag }}{{ form.govt_id_document }}</div>
-      <div class="form-group">{{ form.pancard_number.label_tag }}{{ form.pancard_number }}</div>
-      <div class="form-group">{{ form.pancard_document.label_tag }}{{ form.pancard_document }}</div>
-
+    <!-- PAN Card Upload -->
+    <div class="col-md-6">
+      <div class="form-group">
+        <!-- Pancard Number -->
+        <div class="form-group">
+          {{ form.pancard_number.label_tag }}
+          {{ form.pancard_number }}
+        </div>
+        <label for="id_pancard_document">PAN Card Document</label>
+        {% if form.instance.pancard_document %}
+          <div class="text-end mb-2">
+            <a href="{{ form.instance.pancard_document.url }}" target="_blank" class="btn btn-sm btn-outline-secondary" style="float: left;">View Uploaded</a>
+          </div>
+        {% else %}
+          <input type="file" name="pancard_document" id="id_pancard_document" class="form-control">
+        {% endif %}
+      </div>
     </div>
+  </div>
 
-    <!-- Step 3: Bank Info -->
-    <div class="form-step" id="step-3">
-      <h3>Step 3: Bank Details</h3>
-      <div class="form-group">{{ form.bank_account_number.label_tag }}{{ form.bank_account_number }}</div>
-      <div class="form-group">{{ form.ifsc_code.label_tag }}{{ form.ifsc_code }}</div>
-      <div class="form-group">{{ form.bank_name.label_tag }}{{ form.bank_name }}</div>
-      <button type="button" class="btn btn-outline-success mt-2" id="verifyBankBtn">
-         Verify Bank Details
-      </button>
-
-    </div>
-
-    <!-- Navigation -->
-    <div class="form-navigation">
-      <button type="button" id="prevBtn">⬅ Previous</button>
-      <button type="button" id="nextBtn">Next ➡</button>
-      <button type="submit" class="d-none" id="submitBtn">✅ Submit</button>
-    </div>
-  </form>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    let currentStep = 1;
-    const totalSteps = 3;
-
-    function updateFormStep() {
-      for (let i = 1; i <= totalSteps; i++) {
-        document.getElementById(`step-${i}`).classList.remove('active');
-        document.getElementById(`step-indicator-${i}`).classList.remove('active');
-      }
-      document.getElementById(`step-${currentStep}`).classList.add('active');
-      document.getElementById(`step-indicator-${currentStep}`).classList.add('active');
-
-      document.getElementById('prevBtn').style.display = currentStep === 1 ? 'none' : 'inline-block';
-      document.getElementById('nextBtn').style.display = currentStep === totalSteps ? 'none' : 'inline-block';
-      document.getElementById('submitBtn').classList.toggle('d-none', currentStep !== totalSteps);
-    }
-
-    document.getElementById('nextBtn').addEventListener('click', () => {
-      if (currentStep < totalSteps) {
-        currentStep++;
-        updateFormStep();
-      }
-    });
-
-    document.getElementById('prevBtn').addEventListener('click', () => {
-      if (currentStep > 1) {
-        currentStep--;
-        updateFormStep();
-      }
-    });
-
-    updateFormStep();
-  });
 
 
-  document.getElementById("verifyBankBtn").addEventListener("click", function () {
-    const account = document.getElementById("id_bank_account_number").value;
-    const ifsc = document.getElementById("id_ifsc_code").value;
+          <!-- Step 3: Bank Info -->
+          <div class="form-step" id="step-3">
+            <h3>Step 3: Bank Details</h3>
+            <div class="form-group">{{ form.bank_name.label_tag }}{{ form.bank_name }}</div>
+            <div class="form-group">{{ form.bank_account_number.label_tag }}{{ form.bank_account_number }}</div>
+            <div class="form-group">{{ form.ifsc_code.label_tag }}{{ form.ifsc_code }}</div>
+            <button type="button" class="btn btn-outline-success mt-2" id="verifyBankBtn">
+              Verify Bank Details
+            </button>
+          </div>
 
-    fetch("{% url 'verify_bank' %}", {
-        method: "POST",
-        headers: {
-            "X-CSRFToken": "{{ csrf_token }}",
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: new URLSearchParams({
-            account_number: account,
-            ifsc_code: ifsc
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        alert(data.message);
-    });
-});
-</script>
+          <!-- Navigation Buttons -->
+          <div class="form-navigation">
+            <button type="button" id="prevBtn">⬅ Previous</button>
+            <button type="button" id="nextBtn">Next ➡</button>
+            <button type="submit" class="d-none" id="submitBtn">Submit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+</main>
+
+
 {% endblock %}

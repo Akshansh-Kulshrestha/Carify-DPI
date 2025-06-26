@@ -11,7 +11,7 @@
 
 
           <!-- Manage Vehicles Section -->
-          <div class="card job-card mt-4">
+          <div class="card job-card mt-5">
             <div class="card-header d-flex justify-content-between align-items-center">
               <h4 class="mb-0">Vehicles Information</h4>
             </div>
@@ -38,6 +38,8 @@
                       <th>Health Score</th>
                       <th>Inspected By</th>
                       <th>Inspection Date</th>
+                      <th>Payment Status</th>
+                      <th>Transaction ID</th>
                       <th class="text-center">Action</th>
                     </tr>
                   </thead>
@@ -49,6 +51,8 @@
                       <td>{{ vehicle.health_score }}</td>
                       <td>{{ vehicle.inspected_by.get_full_name|default:vehicle.inspected_by.email }}</td>
                       <td>{{ vehicle.inspection_date }}</td>
+                      <td> {{ vehicle.payment_status }} </td>
+                      <td> {{ vehicle.transaction_id }} </td>
                       <td class="text-center">
                         <div class="d-flex justify-content-center gap-2">
                           <a href="{% url 'print_vehicle_report' vehicle.id %}" target="_blank" class="btn btn-primary btn-sm" title="View Report">
@@ -56,6 +60,9 @@
                           <a href="{% url 'print_vehicle_report' vehicle.id %}" target="_blank" class="btn btn-success btn-sm" title="Print Report">
                             <i class="bx bx-printer"></i>
                           </a>
+                          <a href="{% url 'send_payment_link' vehicle.id %}" class="btn btn-secondary btn-sm" title="Check Payment">
+                            <i class="bx  bx-wallet"></i> 
+                            </a>
                           <a href="{% url 'delete_vehicle' vehicle.id %}" class="btn btn-danger btn-sm" title="Delete Report" onclick="return confirm('Are you sure you want to delete this vehicle?');">
                             <i class="bx bx-trash"></i>
                           </a>

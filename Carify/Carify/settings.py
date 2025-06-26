@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'widget_tweaks',
     'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -140,3 +141,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = '/carify/login/'
 LOGIN_REDIRECT_URL = '/carify/'
 LOGOUT_REDIRECT_URL = '/carify/login/'
+
+# settings.py
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 2000  # or more depending on your form size
+
+# settings.py
+RAZORPAY_API_KEY = 'rzp_test_7qXPzrfaQAo1KQ'
+RAZORPAY_API_SECRET = '6yzRK7bK6Jx1p9WVVnE5di4T'
+
+RAZORPAY_KEY_ID = 'rzp_test_7qXPzrfaQAo1KQ'
+RAZORPAY_KEY_SECRET = '6yzRK7bK6Jx1p9WVVnE5di4T'

@@ -52,7 +52,12 @@ def superadmin_required(view_func):
 
 # ========== Authentication Views ==========
 
+<<<<<<< new-main
+@login_required(login_url = 'login')
+@user_passes_test(is_both)
+=======
 
+>>>>>>> main
 def register_view(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
@@ -69,6 +74,16 @@ def register_view(request):
 
 
 def login_view(request):
+    if request.user.is_authenticated:
+        # Already logged in, redirect based on role
+        if request.user.is_superuser or request.user.is_staff:
+            return redirect('admin_dashboard')
+        elif request.user.is_verified_by_admin:
+            return redirect('admin_dashboard')
+        else:
+            return redirect('profile')  # Unverified users go to profile
+
+    # If not authenticated, proceed with login
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -78,15 +93,16 @@ def login_view(request):
             user = authenticate(request, email=email, password=password)
 
             if user:
-                # ✅ Superusers and staff bypass verification
+                login(request, user)
+                if not remember_me:
+                    request.session.set_expiry(6000)
+
                 if user.is_superuser or user.is_staff or user.is_verified_by_admin:
-                    login(request, user)
-                    if not remember_me:
-                        request.session.set_expiry(6000)
                     messages.success(request, f'Welcome {user.get_full_name() or user.email}!')
                     return redirect('admin_dashboard')
                 else:
-                    messages.error(request, "Your account is not verified by admin yet.")
+                    messages.info(request, "Please complete your profile. Waiting for admin verification.")
+                    return redirect('profile')
             else:
                 messages.error(request, "Invalid email or password.")
     else:
@@ -99,7 +115,12 @@ def logout_view(request):
 
 # ========== Dashboard View ==========
 
+<<<<<<< new-main
+@login_required(login_url = 'login')
+@user_passes_test(is_staff)
+=======
 @login_required
+>>>>>>> main
 def admin_dashboard(request):
     total_vehicles = Vehicle.objects.count()
     total_customers = Customer.objects.count()
@@ -207,7 +228,7 @@ def delete_vehicle(request, pk):
     return redirect('admin_dashboard')
 
 
-@login_required
+@login_required(login_url = 'login')
 def vehicles_inspected_by_single_user(request, user_id):
     user = get_object_or_404(CustomUser, id=user_id)
 
@@ -232,7 +253,7 @@ def vehicles_inspected_by_single_user(request, user_id):
         'page_title': 'My Vehicles',
     })
 
-@login_required
+@login_required(login_url = 'login')
 def vehicles_inspected(request):
     model_name_query = request.GET.get('model', '')
     inspection_date_query = request.GET.get('date', '')
@@ -270,40 +291,68 @@ def format_duration(duration):
     seconds = total_seconds % 60
     return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 
+<<<<<<< new-main
+from django.utils.timezone import localdate, now
+
+
+@login_required(login_url='login')
+@user_passes_test(is_admin)
+=======
 @login_required
+>>>>>>> main
 def user_dashboard(request):
     today = localdate()
     search_query = request.GET.get('search', '')
-    
+
     users_qs = CustomUser.objects.all()
+
     if search_query:
         users_qs = users_qs.filter(email__icontains=search_query)
 
     users = users_qs.annotate(
-        vehicle_count=Count('inspected_vehicles'),
+        vehicle_count=Count('inspected_vehicles', distinct=True),
         total_login_duration=Sum(
             ExpressionWrapper(
                 F('sessions__logout_time') - F('sessions__login_time'),
                 output_field=DurationField()
-            )
+            ),
+            distinct=True
         )
     )
 
-    # Process each user to calculate login duration string and today’s vehicle count
     for user in users:
+        # Format total login duration
         user.total_login_duration_str = format_duration(user.total_login_duration)
 
-        today_vehicles_qs = user.inspected_vehicles.filter(inspection_date=today)
+        # Get today's sessions
+        today_sessions = user.sessions.filter(login_time__date=today)
+
+        total_seconds_today = 0
+        active_session_start = None
+
+        for session in today_sessions:
+            login_time = session.login_time
+            logout_time = session.logout_time or now()
+
+            if session.logout_time is None:
+                active_session_start = login_time
+
+            total_seconds_today += (logout_time - login_time).total_seconds()
+
+        user.today_login_duration_str = format_duration(timedelta(seconds=int(total_seconds_today)))
+        user.live_session_start = active_session_start
+
+        # Count of vehicles inspected today
+        today_vehicles_qs = user.inspected_vehicles.filter(inspection_date=today).distinct()
         user.today_vehicles = today_vehicles_qs
         user.today_vehicle_count = today_vehicles_qs.count()
- 
+
     return render(request, 'user/user_dashboard.html', {
         'users': users,
         'users1': users_qs,
         'page_title': 'User Management',
         'search_query': search_query,
     })
-
 
 def get_active_user_ids():
     active_sessions = Session.objects.filter(expire_date__gte=timezone.now())
@@ -316,7 +365,12 @@ def get_active_user_ids():
     return user_ids
 
 
+<<<<<<< new-main
+@login_required(login_url = 'login')
+@user_passes_test(is_admin)
+=======
 @login_required
+>>>>>>> main
 def verify_user_view(request, user_id):
     user = get_object_or_404(CustomUser, id=user_id)
     user.is_verified_by_admin = True
@@ -325,7 +379,12 @@ def verify_user_view(request, user_id):
     return redirect('user_dashboard')
 
 
+<<<<<<< new-main
+@login_required(login_url = 'login')
+@user_passes_test(is_admin)
+=======
 @login_required
+>>>>>>> main
 def unverify_user_view(request, user_id):
     user = get_object_or_404(CustomUser, id=user_id)
     user.is_verified_by_admin = False
@@ -334,8 +393,13 @@ def unverify_user_view(request, user_id):
     return redirect('user_dashboard')
 
 
+<<<<<<< new-main
+@login_required(login_url = 'login')
+@user_passes_test(is_admin)
+=======
 @login_required
 
+>>>>>>> main
 def delete_user_view(request, user_id):
     user_obj = get_object_or_404(CustomUser, id=user_id)
     user_obj.delete()
@@ -347,10 +411,7 @@ def leave_calendar_view(request, user_id):
     leaves = user.leaves.all()
     return render(request, 'user/leave_calender.html', {'user': user, 'leaves': leaves, 'page_title': 'Leave Calendar'})
 
-from django.http import JsonResponse
-from .models import Leave
-
-@login_required
+@login_required(login_url = 'login')
 def leave_events_json(request, user_id):
     leaves = Leave.objects.filter(user__id=user_id)
     events = []
@@ -372,8 +433,15 @@ def leave_events_json(request, user_id):
 
     return JsonResponse(events, safe=False)
 
+@login_required(login_url='login')
+def view_profile(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
+    return render(request, 'user/view_profile.html', {
+        'user_obj': user,
+        'page_title': f"{user.get_full_name() or user.email}'s Profile"
+    })
 
-@login_required
+@login_required(login_url = 'login')
 def profile_view(request):
     user = request.user
     if request.method == 'POST':
@@ -412,7 +480,7 @@ def verify_bank_details(request):
         else:
             return JsonResponse({'success': False, 'message': 'API error occurred.'})
         
-@login_required
+@login_required(login_url = 'login')
 def apply_leave_view(request):
     leaves = Leave.objects.filter(user=request.user).order_by('-created_at')
     today = date.today().isoformat()
@@ -447,6 +515,31 @@ def manage_leaves_view(request):
     leaves = Leave.objects.all().order_by('-created_at')
     return render(request, 'user/manage_leaves.html', {'leaves': leaves, 'page_title':'Manage Leaves'})
 
+
+@login_required(login_url='login')
+@user_passes_test(lambda u: u.is_superuser)
+def login_logout_report(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
+
+    sessions = user.sessions.all().order_by('-login_time')
+    
+    total_duration = sessions.aggregate(
+        total=Sum(ExpressionWrapper(
+            F('logout_time') - F('login_time'),
+            output_field=DurationField()
+        ))
+    )['total']
+
+    user.total_duration = format_duration(total_duration)
+    user.leave_count = user.leaves.count()
+
+    return render(request, 'user/login_logout_report.html', {
+        'user': user,
+        'session_data': sessions,
+        'page_title': f'{user.email} - Login/Logout Report',
+    })
+
+
 # ========== Engineer Management Views ==========
 
 def engineer_view(request):
@@ -474,7 +567,12 @@ from django.utils.timezone import localdate
 
 # ========== Role & Permission Views ==========
 
+<<<<<<< new-main
+@login_required(login_url = 'login')
+@user_passes_test(is_admin)
+=======
 @login_required
+>>>>>>> main
 def roles_dashboard(request):
     role_form = RoleForm(request.POST or None)
     permission_form = RolePermissionForm(request.POST or None)
@@ -508,7 +606,12 @@ def roles_dashboard(request):
     })
 
 
+<<<<<<< new-main
+@login_required(login_url = 'login')
+@user_passes_test(is_admin)
+=======
 @login_required
+>>>>>>> main
 def manage_roles_permissions(request):
     roles = Roles.objects.all()
     permissions = Permissions.objects.all()
@@ -546,7 +649,12 @@ def manage_roles_permissions(request):
     })
 
 
+<<<<<<< new-main
+@login_required(login_url = 'login')
+@user_passes_test(is_admin)
+=======
 @login_required
+>>>>>>> main
 def assign_permissions_to_role(request):
     form = RolePermissionForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
@@ -567,7 +675,12 @@ def assign_permissions_to_role(request):
     })
 
 
+<<<<<<< new-main
+@login_required(login_url = 'login')
+@user_passes_test(is_admin)
+=======
 @login_required
+>>>>>>> main
 def assign_roles_to_users(request, user_id):
     user = get_object_or_404(User, pk=user_id)
     form = UserRoleAssignForm(request.POST or None)

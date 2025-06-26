@@ -18,6 +18,7 @@ body {
   font-size: 35px;
   font-weight: bold;
   margin: 30px 0 0 50px;
+  margin-top: -8vh;
 }
 .highlight {
   color: #e83058;
@@ -28,7 +29,7 @@ body {
 .vehicle-image {
   width: 90%;
   max-width: 500px;
-  margin: 20vh 0 0 60vh;
+  margin: 20vh 0 0 65vh;
 }
 
 .info {
@@ -115,16 +116,17 @@ body {
   }
 
   .title {
-    margin-left: 85vh;
+    margin-left: 60vh;
     margin-top: -45px;
   }
   .vehicle-image {
-    width: 80%;
-    margin-left: 90vh;
+    width: 50%;
+    margin-left: 55vh;
+    /* margin-top: -5vh; */
   }
 
   .customer-name-info {
-    margin-top: -60vh;
+    margin-top: -40vh;
   }
 
   #name {
@@ -156,7 +158,7 @@ body {
 
   .title {
     font-size: 1rem;
-    margin-left: 35vh;
+    margin-left: 30vh;
     margin-top: -32px;
   }
   .vehicle-image {
@@ -172,6 +174,29 @@ body {
     height: 32px;
   }
 }
+
+
+@media (min-width: 595px) and (max-width: 842px) {
+ .logo{
+  width: 120px;
+  margin-left: 5px;
+ }
+ .title{
+  font-size: medium;
+  margin-left: 50vh;
+  margin-top: 5px;
+ }
+
+  .customer-name-info {
+    width: 350px;
+    margin-top: 20vh;
+  }
+  .vehicle-image{
+    width: 40%;
+    margin-left: 40vh;
+  }
+} 
+
 
 /* 3 page */
 * {
@@ -352,10 +377,12 @@ input[type="text"] {
   margin-bottom: 20px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  overflow-x: hidden;
 }
 .section h3 {
   color: #003e7e;
   margin-bottom: 10px;
+  
 }
 .status {
   float: right;
@@ -377,6 +404,9 @@ th {
   background-color: #003e7e;
   color: white;
 }
+
+
+
 select {
   padding: 4px;
 }

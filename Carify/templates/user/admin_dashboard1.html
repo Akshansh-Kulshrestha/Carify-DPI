@@ -4,9 +4,8 @@
 <!-- Main Content -->
 <main class="page-body-wrapper">
   <div class="page-body">
-    <div class="container-fluid">
-      <div class="card job-card mt-3">
-        <div class="card-body">
+    <div class="container-fluid mt-5 ">
+
           <div class="row">  <!-- 🔧 Add this row wrapper -->
             {% for card in dashboard_cards %}
             <div class="col-lg-3 col-md-6 col-sm-6 col-12 mb-4">
@@ -14,12 +13,12 @@
                 <div class="card-body pt-3 summary-card text-center">
                   <div class="summary-progressbar">
                     <div class="d-flex align-items-center justify-content-between mb-3">
-                      <i class="fa-solid {{ card.icon }} fa-lg" style="color: #F04C5C;"></i>
+                      <i class="fa-solid {{ card.icon }} fa-lg" style="color: #052d47;"></i>
                       <h6 class="mb-1 text-start">{{ card.label }}</h6>
                       <h6 class="fw-bold text-dark mb-0">{{ card.value }}</h6>
                     </div>
                     <div class="progress sm-progress-bar" style="height: 8px;">
-                      <div class="progress-bar bg-danger"
+                      <div class="progress-bar bg-secondary"
                         role="progressbar"
                         style="width: {{ card.width }}%;"
                         aria-valuenow="{{ card.width }}"
@@ -32,8 +31,8 @@
             </div>
             {% endfor %}
           </div> <!-- End row -->
-        </div> <!-- End card-body -->
-      </div> <!-- End card -->
+
+
     </div> <!-- End container-fluid -->
   </div> <!-- End page-body -->
 </main>

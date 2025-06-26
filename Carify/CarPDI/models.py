@@ -32,6 +32,15 @@ class VehicleEngineType(models.Model):
 
 class Vehicle(models.Model):
 
+    payment_status = models.CharField(max_length=20, choices=[
+        ('pending', 'Pending'),
+        ('success', 'Success'),
+        ('failed', 'Failed'),
+    ], default='pending')
+    transaction_id = models.CharField(max_length=100, blank=True, null=True)
+    payment_amount = models.FloatField(default=500.0) 
+    payment_link_id = models.CharField(max_length=100, blank=True, null=True)
+
     image = models.ImageField(upload_to='cars')
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     model = models.CharField(max_length=100)
