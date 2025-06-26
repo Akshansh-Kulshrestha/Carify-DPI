@@ -29,19 +29,35 @@ User = get_user_model()
 
 # ========== Access Control Decorators ==========
 
-def is_admin(user):
-    return user.is_authenticated and user.is_staff
+def admin_required(view_func):
+    decorated_view_func = login_required(user_passes_test(
+        lambda user: user.is_authenticated and user.is_staff,
+        login_url='login'
+    )(view_func), login_url='login')
+    return decorated_view_func
 
-def is_staff(user):
-    return user.is_authenticated and (user.is_verified_by_admin or user.is_superuser)
+def staff_required(view_func):
+    decorated_view_func = login_required(user_passes_test(
+        lambda user: user.is_authenticated and (user.is_verified_by_admin or user.is_superuser),
+        login_url='login'
+    )(view_func), login_url='login')
+    return decorated_view_func
 
-def is_both(user):
-    return user.is_authenticated and user.is_superuser and user.is_staff
+def superadmin_required(view_func):
+    decorated_view_func = login_required(user_passes_test(
+        lambda user: user.is_authenticated and user.is_superuser and user.is_staff,
+        login_url='login'
+    )(view_func), login_url='login')
+    return decorated_view_func
 
 # ========== Authentication Views ==========
 
+<<<<<<< new-main
 @login_required(login_url = 'login')
 @user_passes_test(is_both)
+=======
+
+>>>>>>> main
 def register_view(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
@@ -93,21 +109,18 @@ def login_view(request):
         form = LoginForm()
     return render(request, 'user/login.html', {'form': form})
 
-
-
-
 def logout_view(request):
     logout(request)
     return redirect('login')
 
-
-
-
-
 # ========== Dashboard View ==========
 
+<<<<<<< new-main
 @login_required(login_url = 'login')
 @user_passes_test(is_staff)
+=======
+@login_required
+>>>>>>> main
 def admin_dashboard(request):
     total_vehicles = Vehicle.objects.count()
     total_customers = Customer.objects.count()
@@ -278,11 +291,15 @@ def format_duration(duration):
     seconds = total_seconds % 60
     return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 
+<<<<<<< new-main
 from django.utils.timezone import localdate, now
 
 
 @login_required(login_url='login')
 @user_passes_test(is_admin)
+=======
+@login_required
+>>>>>>> main
 def user_dashboard(request):
     today = localdate()
     search_query = request.GET.get('search', '')
@@ -348,8 +365,12 @@ def get_active_user_ids():
     return user_ids
 
 
+<<<<<<< new-main
 @login_required(login_url = 'login')
 @user_passes_test(is_admin)
+=======
+@login_required
+>>>>>>> main
 def verify_user_view(request, user_id):
     user = get_object_or_404(CustomUser, id=user_id)
     user.is_verified_by_admin = True
@@ -358,8 +379,12 @@ def verify_user_view(request, user_id):
     return redirect('user_dashboard')
 
 
+<<<<<<< new-main
 @login_required(login_url = 'login')
 @user_passes_test(is_admin)
+=======
+@login_required
+>>>>>>> main
 def unverify_user_view(request, user_id):
     user = get_object_or_404(CustomUser, id=user_id)
     user.is_verified_by_admin = False
@@ -368,8 +393,13 @@ def unverify_user_view(request, user_id):
     return redirect('user_dashboard')
 
 
+<<<<<<< new-main
 @login_required(login_url = 'login')
 @user_passes_test(is_admin)
+=======
+@login_required
+
+>>>>>>> main
 def delete_user_view(request, user_id):
     user_obj = get_object_or_404(CustomUser, id=user_id)
     user_obj.delete()
@@ -467,7 +497,6 @@ def apply_leave_view(request):
 
     return render(request, 'user/apply_leave.html', {'form': form, 'leaves':leaves, 'today':today, 'page_title':'Apply For a Leave'})
 
-@user_passes_test(is_admin)
 def approve_leave(request, leave_id):
     leave = get_object_or_404(Leave, id=leave_id)
     leave.status = 'approved'
@@ -475,7 +504,6 @@ def approve_leave(request, leave_id):
     messages.success(request, f"Leave for {leave.user.email} approved.")
     return redirect('manage_leaves')
 
-@user_passes_test(is_admin)
 def reject_leave(request, leave_id):
     leave = get_object_or_404(Leave, id=leave_id)
     leave.status = 'rejected'
@@ -483,7 +511,6 @@ def reject_leave(request, leave_id):
     messages.warning(request, f"Leave for {leave.user.email} rejected.")
     return redirect('manage_leaves')
 
-@user_passes_test(is_admin)
 def manage_leaves_view(request):
     leaves = Leave.objects.all().order_by('-created_at')
     return render(request, 'user/manage_leaves.html', {'leaves': leaves, 'page_title':'Manage Leaves'})
@@ -540,8 +567,12 @@ from django.utils.timezone import localdate
 
 # ========== Role & Permission Views ==========
 
+<<<<<<< new-main
 @login_required(login_url = 'login')
 @user_passes_test(is_admin)
+=======
+@login_required
+>>>>>>> main
 def roles_dashboard(request):
     role_form = RoleForm(request.POST or None)
     permission_form = RolePermissionForm(request.POST or None)
@@ -575,8 +606,12 @@ def roles_dashboard(request):
     })
 
 
+<<<<<<< new-main
 @login_required(login_url = 'login')
 @user_passes_test(is_admin)
+=======
+@login_required
+>>>>>>> main
 def manage_roles_permissions(request):
     roles = Roles.objects.all()
     permissions = Permissions.objects.all()
@@ -614,8 +649,12 @@ def manage_roles_permissions(request):
     })
 
 
+<<<<<<< new-main
 @login_required(login_url = 'login')
 @user_passes_test(is_admin)
+=======
+@login_required
+>>>>>>> main
 def assign_permissions_to_role(request):
     form = RolePermissionForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
@@ -636,8 +675,12 @@ def assign_permissions_to_role(request):
     })
 
 
+<<<<<<< new-main
 @login_required(login_url = 'login')
 @user_passes_test(is_admin)
+=======
+@login_required
+>>>>>>> main
 def assign_roles_to_users(request, user_id):
     user = get_object_or_404(User, pk=user_id)
     form = UserRoleAssignForm(request.POST or None)

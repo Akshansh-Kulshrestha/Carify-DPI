@@ -6,13 +6,35 @@ import uuid
 from django.utils import timezone
 from django.conf import settings
 
+class Permissions(models.Model):
+    code = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100, unique=True)
 
+    def save(self, *args, **kwargs):
+        if not Permissions.objects.exists():
+            self.code = 100
+        else:
+            self.code = Permissions.objects.last().code + 1
+        super(Permissions, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.name}"
+
+class Roles(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=50, unique=True)
+    permissions = models.ManyToManyField(Permissions, related_name="roles")
+    status=models.IntegerField(blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+    
 class CustomUser(AbstractUser):
     username=None
     emp_id = models.CharField(max_length=20, blank=True, null=True, unique=True)
     email=models.EmailField(_("email address"), unique=True)
     is_verified_by_admin = models.BooleanField(default=False)
-
+    
      # ✅ Personal Info
     date_of_birth = models.DateField(null=True, blank=True)
     gender = models.CharField(max_length=10, choices=[('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')], blank=True)
@@ -45,10 +67,7 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.email   
-    
-    def is_admin(self):
-        return self.is_staff
-    
+   
     def save(self, *args, **kwargs):
         if not self.pk and not self.emp_id:
             # Only generate emp_id for new user creation
@@ -128,32 +147,7 @@ class Leave(models.Model):
 
     def __str__(self):
         return f"{self.user.email} | {self.start_date} to {self.end_date} | {self.status}"
-
-    
-
-class Permissions(models.Model):
-    code = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100, unique=True)
-
-    def save(self, *args, **kwargs):
-        if not Permissions.objects.exists():
-            self.code = 100
-        else:
-            self.code = Permissions.objects.last().code + 1
-        super(Permissions, self).save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.name}"
-
-class Roles(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=50, unique=True)
-    permissions = models.ManyToManyField(Permissions, related_name="roles")
-    status=models.IntegerField(blank=True, null=True)
-
-    def __str__(self):
-        return self.name
-            
+      
 class UserRole(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     role = models.ForeignKey(Roles, on_delete=models.CASCADE)

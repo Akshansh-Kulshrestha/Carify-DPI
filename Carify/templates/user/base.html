@@ -123,9 +123,14 @@
               <span class="label-text">Dashboard</span>
             </a>
           </li>
+<<<<<<< new-main
           {% endif %}
           {% if request.user.is_authenticated %}
           {% if request.user.is_staff %}
+=======
+            {% endif %}
+            {% if request.user.is_authenticated %}
+>>>>>>> main
             <li class="sidebar-list dropdown {% if request.resolver_match.url_name in 'user_dashboard roles_dashboard' %}open active{% endif %}">
               <a href="#" class="sidebar-link d-flex align-items-center toggle-dropdown">
                 <i class="fa-solid fa-users fa-lg" style="color: #052d47; padding-left:15px;"></i>
@@ -138,7 +143,12 @@
                 {% endif %}
               </ul>
             </li>
+<<<<<<< new-main
             
+=======
+            {% endif %}
+             {% if request.user.is_authenticated %}
+>>>>>>> main
             <li class="sidebar-list dropdown {% if request.resolver_match.url_name in 'engineer manage_leaves login_hours' %}open active{% endif %}">
               <a href="#" class="sidebar-link d-flex align-items-center toggle-dropdown">
                 <i class="fa-solid fa-users-gear" style="color: #052d47; padding-left:15px;"></i>
@@ -150,8 +160,11 @@
               </ul>
             </li>
             {% endif %}
+<<<<<<< new-main
             {% endif %}
             
+=======
+>>>>>>> main
             {% if request.user.is_authenticated %}
             {% if request.user.is_staff or request.user.is_verified_by_admin%}
             <li class="sidebar-list dropdown {% if request.resolver_match.url_name in 'vehicles_inspected vehicles_inspected_by_user' %}open active{% endif %}">
